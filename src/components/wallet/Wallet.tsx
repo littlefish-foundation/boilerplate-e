@@ -4,6 +4,7 @@ import getInstalledWallets from "./GetInstalledWallets.tsx";
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Fragment } from 'react'
+import { useWallet } from "../../providers/walletContext.tsx";
 
 interface WalletProps {
   name: string;
@@ -13,20 +14,10 @@ function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
   }
 
-function Wallet({ name }: WalletProps) {
-  const {
-    isEnabled,
-    isConnected,
-    enabledWallet,
-    stakeAddress,
-    signMessage,
-    connect,
-    disconnect,
-    accountBalance,
-  } = useCardano();
-  const installedWallets = getInstalledWallets();
-
-  const onConnect = () => alert("Successfully connected!");
+function Wallet() {
+  const { isConnected, connect, disconnect, accountBalance, usedAddresses } = useWallet();
+  const installedWallets = getInstalledWallets(); // Assume this is provided
+  console.log(usedAddresses[0]);
 
   return (
     !isConnected ? 
@@ -79,4 +70,3 @@ function Wallet({ name }: WalletProps) {
 }
 
 export default Wallet;
-
