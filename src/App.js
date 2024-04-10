@@ -1,24 +1,21 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import Wallet from './components/wallet/Wallet.tsx';
+import getInstalledWallets from './components/wallet/GetInstalledWallets.tsx';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Head from './components/head/page.tsx';
+import HomePage from './components/home/home.tsx';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+    <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+    <Route path="/head" element={<Head />} />
+      </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 
