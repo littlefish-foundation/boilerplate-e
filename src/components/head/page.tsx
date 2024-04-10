@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Wallet from '../wallet/Wallet.tsx'
-import getInstalledWallets from '../wallet/GetInstalledWallets.tsx'
+import SignMessage from '../signMessage.tsx'
 import '../../App.css';
 
 const navigation = [
@@ -51,6 +51,7 @@ export default function Head() {
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
                 <Wallet />
+                <SignMessage />
             </a>
           </div>
         </nav>
