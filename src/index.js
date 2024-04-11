@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { WalletProvider } from './providers/walletContext.tsx';
+// import { WalletProvider } from 'littlefish-nft-futh-framework/dist/contexts/WalletContext.js'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

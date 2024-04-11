@@ -11,13 +11,13 @@ const blockfrostAPI = axios.create({
   },
 });
 
-export const GetAssets = async (address: String): Promise<any> => {
+
+export const GetAssets = async (address)=> {
   try {
-    const response = await blockfrostAPI.get(`/addresses/${address}/utxos`);
-    const utxos = response.data;
-      return utxos;
+    const response = await blockfrostAPI.get(`/addresses/${address}/utxos`)
+    return response.data;
   } catch (error) {
-    console.error('Error fetching assets from address:', error.response ? error.response.data : error);
+    console.error('Error fetching assets for addresses:', error);
     throw error;
   }
 }

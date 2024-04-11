@@ -2,14 +2,13 @@ import  React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import Wallet from '../wallet/Wallet.tsx'
-import SignMessage from '../signMessage.tsx'
+import Wallet from '../../components/wallet/Wallet.tsx'
 import '../../App.css';
 
 const navigation = [
   { name: 'Assets', href: '/assets' },
   { name: 'Documentation', href: '/docs' },
-  //{ name: 'Marketplace', href: '#' },
+  { name: 'Sign', href: '/sign' },
   { name: 'About Us', href: '/about' },
 ]
 
@@ -51,7 +50,6 @@ export default function Head() {
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
                 <Wallet />
-                <SignMessage />
             </a>
           </div>
         </nav>

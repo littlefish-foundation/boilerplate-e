@@ -1,23 +1,18 @@
-import { useCardano } from "@cardano-foundation/cardano-connect-with-wallet";
-import React, { useState } from "react";
+import React from "react";
 import getInstalledWallets from "./GetInstalledWallets.tsx";
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { Fragment } from 'react'
 import { useWallet } from "../../providers/walletContext.tsx";
 
-interface WalletProps {
-  name: string;
-}
-
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
   }
 
 function Wallet() {
-  const { isConnected, connect, disconnect, accountBalance, usedAddresses } = useWallet();
+  const { isConnected, connect, disconnect, accountBalance, stakeAddress } = useWallet();
   const installedWallets = getInstalledWallets(); // Assume this is provided
-  console.log(usedAddresses[0]);
+  console.log(stakeAddress);
 
   return (
     !isConnected ? 
