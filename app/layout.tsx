@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
+import { IsClientCtxProvider } from "./isClient";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,7 +30,9 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <IsClientCtxProvider>
           <Providers>{children}</Providers>
+          </IsClientCtxProvider>
           <Toaster />
         </ThemeProvider>
       </body>

@@ -7,8 +7,10 @@ import React from "react";
 import { useWallet } from "littlefish-nft-auth-framework";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useIsClient } from "../../isClient";
 
 export default function LoginPage() {
+  const isClient = useIsClient();
   const router = useRouter();
   const {
     isConnected,
@@ -30,7 +32,7 @@ export default function LoginPage() {
         <ChevronLeft className="mr-2 h-4 w-4" />
         Back
       </button>
-      {wallets.length > 0 ? (
+      {isClient && wallets.length > 0 ? (
         <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
           <div className="flex flex-col gap-2 text-center">
             <img src="logo2.png" className="mx-auto h-16 w-16" />
