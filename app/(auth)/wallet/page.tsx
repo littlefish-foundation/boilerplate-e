@@ -7,10 +7,8 @@ import React from "react";
 import { useWallet } from "littlefish-nft-auth-framework";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useIsClient } from "../../isClient";
 
 export default function LoginPage() {
-  const isClient = useIsClient();
   const router = useRouter();
   const {
     isConnected,
@@ -18,6 +16,7 @@ export default function LoginPage() {
     disconnectWallet,
     wallets,
     connectedWalletId,
+    isClient,
   } = useWallet();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   return (
