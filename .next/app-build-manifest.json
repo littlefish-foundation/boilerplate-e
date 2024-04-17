@@ -26,10 +26,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/assets/layout.js"
     ],
-    "/(auth)/wallet/page": [
+    "/not-found": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(auth)/wallet/page.js"
+      "static/chunks/app/not-found.js"
     ]
   }
 }

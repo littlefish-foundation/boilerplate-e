@@ -1,6 +1,5 @@
 {
-  "/(auth)/wallet/page": "app/(auth)/wallet/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/not-found": "app/not-found.js",
   "/(marketing)/page": "app/(marketing)/page.js",
   "/assets/page": "app/assets/page.js"
 }

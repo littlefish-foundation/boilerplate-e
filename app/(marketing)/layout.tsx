@@ -12,7 +12,7 @@ export default async function MarketingLayout({
     <>
       {/* <SiteBanner /> */}
       <SiteHeader />
-      <main className="mx-auto flex-1 overflow-hidden">{children}</main>
+      <main title="littlefish" className="mx-auto flex-1 overflow-hidden">{children}</main>
       <SiteFooter />
     </>
   );
