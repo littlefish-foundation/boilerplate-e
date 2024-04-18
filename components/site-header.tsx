@@ -21,15 +21,15 @@ const menuItem = [
     href: "https://tools.littlefish.foundation/littlefish-research-hub",
   },
   {
-    id: 2,
+    id: 3,
     label: "IKIGAI Journey",
     href: "https://www.journey4.life/",
   },
   {
     id: 4,
-    label: "Contact Us",
-    href: "#",
-  },
+    label: "DAO Tool Map",
+    href: "https://map.littlefish.foundation/"
+  }
 ];
 
 export function SiteHeader() {
@@ -110,7 +110,7 @@ export function SiteHeader() {
           <Link className="text-md flex items-center" href="/">
           <img src="logo1.png" alt="Logo" className="w-42 h-10"/>
           </Link>
-          <div className="flex-grow flex justify-center items-center gap-x-8">
+          <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
           {menuItem.map((item) => (
               <motion.li
                 variants={mobileLinkVar}
