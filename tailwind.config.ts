@@ -23,18 +23,18 @@ const config = {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       colors: {
-        'electric-violet': {
-          '50': '#fcf4ff',
-          '100': '#f8e5ff',
-          '200': '#f2d0ff',
-          '300': '#e8aaff',
-          '400': '#d975ff',
-          '500': '#cc40ff',   // This would be 'electric-violet-500'
-          '600': '#be1bff',
-          '700': '#aa0ce8',
-          '800': '#8c10b9',
-          '900': '#730e95',
-          '950': '#510070',
+        "electric-violet": {
+          "50": "#fcf4ff",
+          "100": "#f8e5ff",
+          "200": "#f2d0ff",
+          "300": "#e8aaff",
+          "400": "#d975ff",
+          "500": "#cc40ff", // This would be 'electric-violet-500'
+          "600": "#be1bff",
+          "700": "#aa0ce8",
+          "800": "#8c10b9",
+          "900": "#730e95",
+          "950": "#510070",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -137,6 +137,7 @@ const config = {
         shimmer: "shimmer 8s infinite",
         marquee: "marquee var(--duration) infinite linear",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+        shimmer: "shimmer 8s infinite",
       },
     },
   },
