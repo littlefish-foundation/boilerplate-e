@@ -7,6 +7,7 @@ import { SphereMask } from "@/components/magicui/sphere-mask";
 import PropertiesSection from "@/components/landing/properties-section";
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import { BentoDemo } from "@/components/landing/bento-grid";
+import { FAQ } from "@/components/landing/faq-section";
 
 export default async function Page() {
   return (
@@ -14,6 +15,8 @@ export default async function Page() {
       <HeroSection />
       <BentoDemo />
       <PropertiesSection />
+      <FAQ />
+
       <CallToActionSection />
       <Particles
         className="absolute inset-0 -z-10"
