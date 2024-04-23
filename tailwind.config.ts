@@ -137,7 +137,6 @@ const config = {
         shimmer: "shimmer 8s infinite",
         marquee: "marquee var(--duration) infinite linear",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
-        shimmer: "shimmer 8s infinite",
       },
     },
   },

@@ -78,7 +78,7 @@ const features = [
     name: "Comprehensive Documentation",
     description:
       "Includes detailed documentation and user guides to help developers integrate the authentication system quickly.",
-    href: "/documentation",
+    href: "https://tools.littlefish.foundation/littlefish-research-hub/littlefish-open-source/open-source-nft-and-wallet-auth-framework-for-cardano",
     cta: "Learn more",
     background: (
       <img

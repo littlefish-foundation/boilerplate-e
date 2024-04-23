@@ -62,22 +62,6 @@ export default function HeroSection() {
         ref={ref}
         className="relative mt-[1rem] animate-fade-up opacity-0 [--animation-delay:400ms] [perspective:2000px] after:absolute after:inset-0 after:z-50 after:[background:linear-gradient(to_top,hsl(var(--background))_30%,transparent)]"
       >
-        <h2 className="bg-gradient-to-br from-white from-30% to-white/40 bg-clip-text py-6 text-4xl font-medium leading-none tracking-tighter text-transparent text-balance sm:text-3xl md:text-5xl lg:text-5xl translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:200ms]">
-          Features
-        </h2>
-        <div
-          className={`rounded-xl border border-white/10 bg-white bg-opacity-[0.01] before:absolute before:bottom-1/2 before:left-0 before:top-0 before:h-full before:w-full before:opacity-0 before:[filter:blur(180px)] before:[background-image:linear-gradient(to_bottom,var(--color-one),var(--color-one),transparent_40%)] ${
-            inView ? "before:animate-image-glow" : ""
-          }`}
-        >
-          <BorderBeam
-            size={100}
-            duration={12}
-            delay={11}
-            colorFrom="var(--color-one)"
-            colorTo="var(--color-two)"
-          />
-        </div>
       </div>
     </section>
   );
