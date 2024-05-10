@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { useWallet } from "littlefish-nft-auth-framework";
+import { useWallet } from "littlefish-nft-auth-framework-beta";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 

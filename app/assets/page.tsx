@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useWallet } from "littlefish-nft-auth-framework";
+import { useWallet } from "littlefish-nft-auth-framework-beta";
 import { BorderBeam } from "@/components/magicui/border-beam";
+import { Asset } from "next/font/google";
 
 const CardComponent = () => {
   const { assets, isConnected, decodeHexToAscii } = useWallet();
@@ -36,18 +37,18 @@ const CardComponent = () => {
               />
             )}
             <h2 className="text-center font-bold text-xs mb-4 text-electric-violet-500">
-              PolicyID: {item[0]}
+              PolicyID: {item.policyID}
             </h2>
             {hoverIndex === index ? (
               <React.Fragment>
-                <p className="text-gray-600">Name: {assets[index][1]}</p>
+                <p className="text-gray-600">Name: {assets[index].assetName}</p>
               </React.Fragment>
             ) : (
               <React.Fragment>
-                <p className="text-gray-600">Name: {item[1]}</p>
+                <p className="text-gray-600">Name: {item.assetName}</p>
               </React.Fragment>
             )}
-            <p className="text-gray-600">Amount: {item[2]}</p>
+            <p className="text-gray-600">Amount: {item.amount}</p>
           </div>
         </div>
       ))}
