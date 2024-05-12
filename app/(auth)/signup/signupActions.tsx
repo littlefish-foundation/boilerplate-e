@@ -9,7 +9,7 @@ export async function signupWithMail(
   password: string
 ): Promise<string | void> {
   try {
-    const requestBody = JSON.stringify({ email, password });
+    const requestBody = JSON.stringify({ email: email, password: password });
 
     const response = await fetch(`/api/signup`, {
       method: "POST",
@@ -18,12 +18,18 @@ export async function signupWithMail(
       },
       body: requestBody,
     });
-
-    const json = await response.json();
+    console.log(response)
+    if (!response.ok) {
+        const errorText = await response.text();  // Read response as text to see what went wrong
+        console.error("Failed to signup with response:", errorText);
+        return `Error: ${response.statusText}`;
+      }
+    
+    const json = await response.json(); // stuck here
     console.log(json);
 
     if (response.ok) {
-      redirect("/login");
+      console.log("Signup successful");
     } else {
       return json.error;
     }
@@ -49,23 +55,22 @@ export async function signupWithCardano(
     console.log("Key: ", key);
 
     // Construct the POST request body dynamically based on the input type
-    
     const requestBody = JSON.stringify({
       walletAddress,
       key,
-      signature: signature,
+      signature,
       walletNetwork: networkID,
       nonce,
     });
-    
-    const response = await fetch(`http://localhost:3000/api/signup`, {
+    console.log(requestBody)
+    const response = await fetch(`/api/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
-
+    console.log(response)
     if (!response.ok) {
         const errorText = await response.text();  // Read response as text to see what went wrong
         console.error("Failed to signup with response:", errorText);

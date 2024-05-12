@@ -21,22 +21,40 @@ export default function SignUpPage() {
     const [key, setKey] = useState('');
     const [signature, setSignature] = useState('');
 
-    function handleSignup() {
+    function handleCardanoSignup() {
       signupWithCardano(connectedWalletId, isConnected, addresses[0], networkID);
       //console.log(signMessage(connectedWalletId, isConnected, addresses[0], networkID));
     }
+    function handleEmailSignup() {
+      signupWithMail(email, password);
+    }
   return (
     <div>
+      <form>
+        <input
+          type="text"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </form>
+      <button onClick={handleEmailSignup}>Signup with Email</button>
         {isConnected ? (
           <div>
-            <button onClick={() => handleSignup()}>Signup with Wallet</button>
+            <button onClick={() => handleCardanoSignup()}>Signup with Wallet</button>
             <p>Connected Wallet: {connectedWalletId}</p>
             <button onClick={() => disconnectWallet()}>
               Disconnect Wallet
             </button>
           </div>
         ) : (
-          <button onClick={() => connectWallet("nami")}>Connect Wallet</button>
+          <button onClick={() => connectWallet("eternl")}>Connect Wallet</button>
         )}
     </div>
   );
