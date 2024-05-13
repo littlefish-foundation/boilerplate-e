@@ -1,17 +1,18 @@
 import { redirect } from "next/navigation";
 import { signMessage } from "littlefish-nft-auth-framework-beta";
 import { randomBytes } from "crypto";
+import { cookies } from "next/headers";
 
 //const { signMessage } = require('littlefish-nft-auth-framework-beta');
 
-export async function signupWithMail(
+export async function loginWithMail(
   email: string,
   password: string
 ): Promise<string | void> {
   try {
     const requestBody = JSON.stringify({ email: email, password: password });
 
-    const response = await fetch(`/api/signup`, {
+    const response = await fetch(`/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +22,7 @@ export async function signupWithMail(
     console.log(response);
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
-      console.error("Failed to signup with response:", errorText);
+      console.error("Failed to login with response:", errorText);
       return `Error: ${response.statusText}`;
     }
 
@@ -29,16 +30,16 @@ export async function signupWithMail(
     console.log(json);
 
     if (response.ok) {
-      console.log("Signup successful");
+      console.log("login successful");
     } else {
       return json.error;
     }
   } catch (error) {
-    console.error("Signup action failed:", error);
+    console.error("login action failed:", error);
   }
 }
 
-export async function signupWithCardano(
+export async function loginWithCardano(
   walletID: string,
   isConnected: boolean,
   walletAddress: string,
@@ -56,7 +57,6 @@ export async function signupWithCardano(
       nonce,
       walletAddress
     );
-    console.log(signResponse);
     if (signResponse) {
       [key, signature] = signResponse;
     }
@@ -65,13 +65,12 @@ export async function signupWithCardano(
     // Construct the POST request body dynamically based on the input type
     const requestBody = JSON.stringify({
       walletAddress,
-      walletNetwork,
-      signature,
       key,
+      signature,
       nonce,
     });
     console.log(requestBody);
-    const response = await fetch(`/api/signup`, {
+    const response = await fetch(`/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,7 +80,7 @@ export async function signupWithCardano(
     console.log(response);
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
-      console.error("Failed to signup with response:", errorText);
+      console.error("Failed to login with response:", errorText);
       return `Error: ${response.statusText}`;
     }
 
@@ -89,11 +88,11 @@ export async function signupWithCardano(
     console.log(json);
 
     if (response.ok) {
-      console.log("Signup successful");
+      console.log("login successful");
     } else {
       return json.error;
     }
   } catch (error) {
-    console.error("Signup action failed:", error);
+    console.error("login action failed:", error);
   }
 }

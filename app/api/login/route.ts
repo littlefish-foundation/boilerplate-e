@@ -1,10 +1,10 @@
 import prisma from "@/app/lib/prisma";
-import { signupUser } from "littlefish-nft-auth-framework-beta/backend";
+import { loginUser } from "littlefish-nft-auth-framework-beta/backend";
 //const { signupUser } = require('littlefish-nft-auth-framework-beta');
 
 export async function POST(request: Request) {
-    console.log("hehe")
     const body = await request.json();
+    let user;
     const {
         email,
         password,
@@ -14,9 +14,22 @@ export async function POST(request: Request) {
         key,
         nonce
     } = body;
-    console.log(body)
+    if (email && password) {
+        user = await prisma.user.findFirst({
+            where: {
+                email,
+            },
+        });
+    } else if (walletAddress && walletNetwork) {
+        user = await prisma.user.findFirst({
+            where: {
+                walletAddress,
+            },
+        });
+    }
+    
     const options = { email, password, walletAddress, walletNetwork, signature, key, nonce };
-    const result = await signupUser(body);
+    //const result = await loginUser(user, body);
     console.log(result)
     //const result = { success: true, email, passwordHash, walletAddress, walletNetwork, signature, key, nonce };
     if (!result.success) {
@@ -24,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     if (result.success) {
-        if ( result.email && result.passwordHash ) {
+        if (result.email && result.passwordHash) {
             await prisma.user.create({
                 data: {
                     email: result.email,

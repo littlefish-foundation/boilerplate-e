@@ -10,9 +10,9 @@ export default function SignUpPage() {
     connectedWalletId,
     connectWallet,
     disconnectWallet,
-    networkID,
     addresses,
   } = useWallet();
+  const networkID = 1;
   const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -22,7 +22,9 @@ export default function SignUpPage() {
     const [signature, setSignature] = useState('');
 
     function handleCardanoSignup() {
-      signupWithCardano(connectedWalletId, isConnected, addresses[0], networkID);
+      if (connectedWalletId !== null) {
+        signupWithCardano(connectedWalletId, isConnected, addresses[0], networkID);
+      }
       //console.log(signMessage(connectedWalletId, isConnected, addresses[0], networkID));
     }
     function handleEmailSignup() {
@@ -54,13 +56,8 @@ export default function SignUpPage() {
             </button>
           </div>
         ) : (
-          <button onClick={() => connectWallet("eternl")}>Connect Wallet</button>
+          <button onClick={() => connectWallet("nami")}>Connect Wallet</button>
         )}
     </div>
   );
-}
-
-interface BlockchainData {
-  walletAddress: string;
-  networkID: number;
 }
