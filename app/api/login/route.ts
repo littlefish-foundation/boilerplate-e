@@ -1,10 +1,12 @@
 import prisma from "@/app/lib/prisma";
 import { loginUser } from "littlefish-nft-auth-framework-beta/backend";
+import type { User } from "littlefish-nft-auth-framework-beta/";
+import * as jose from "jose";
 //const { signupUser } = require('littlefish-nft-auth-framework-beta');
 
 export async function POST(request: Request) {
     const body = await request.json();
-    let user;
+    let user: User;
     const {
         email,
         password,
@@ -28,33 +30,24 @@ export async function POST(request: Request) {
         });
     }
     
-    const options = { email, password, walletAddress, walletNetwork, signature, key, nonce };
-    //const result = await loginUser(user, body);
+    //const options = { email, password, walletAddress, walletNetwork, signature, key, nonce };
+    const result = await loginUser(user, body);
     console.log(result)
     //const result = { success: true, email, passwordHash, walletAddress, walletNetwork, signature, key, nonce };
     if (!result.success) {
         return new Response(JSON.stringify({ error: result.error }), { status: 400 });
     }
 
-    if (result.success) {
-        if (result.email && result.passwordHash) {
-            await prisma.user.create({
-                data: {
-                    email: result.email,
-                    password: result.passwordHash,
-                    emailVerified: new Date(),
-                },
-            });
-        } else {
-            await prisma.user.create({
-                data: {
-                    walletAddress: result.walletAddress,
-                    walletNetwork: result.walletNetwork,
-                    walletAddressVerified: new Date(),
-                },
-            });
-        }
-    }
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const alg = "HS256";
 
-    return new Response(JSON.stringify({ success: true }), { status: 200 });
+    const jwt = await new jose.SignJWT({})
+        .setProtectedHeader({ alg })
+        .setIssuedAt()
+        .setIssuer("littlefish")
+        .setSubject(user.id)
+        .setExpirationTime("2h")
+        .sign(secret);
+
+    return Response.json({ token: jwt });
 }

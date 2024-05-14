@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { signMessage } from "littlefish-nft-auth-framework-beta";
-import { randomBytes } from "crypto";
+import { randomBytes, sign } from "crypto";
 import { cookies } from "next/headers";
 
 //const { signMessage } = require('littlefish-nft-auth-framework-beta');
@@ -19,7 +19,7 @@ export async function loginWithMail(
       },
       body: requestBody,
     });
-    console.log(response);
+
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to login with response:", errorText);
@@ -27,10 +27,17 @@ export async function loginWithMail(
     }
 
     const json = await response.json(); // stuck here
-    console.log(json);
+
+    cookies().set("Authorization", json.token, {
+      secure: true,
+      httpOnly: true,
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "strict",
+    });
 
     if (response.ok) {
-      console.log("login successful");
+      redirect("/protected");
     } else {
       return json.error;
     }
@@ -60,13 +67,13 @@ export async function loginWithCardano(
     if (signResponse) {
       [key, signature] = signResponse;
     }
-    console.log("Key: ", key);
 
     // Construct the POST request body dynamically based on the input type
     const requestBody = JSON.stringify({
       walletAddress,
-      key,
+      walletNetwork,
       signature,
+      key,
       nonce,
     });
     console.log(requestBody);
