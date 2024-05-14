@@ -1,9 +1,15 @@
-import { redirect } from "next/navigation";
-import { signMessage } from "littlefish-nft-auth-framework-beta";
+"use server";
 import { randomBytes, sign } from "crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 //const { signMessage } = require('littlefish-nft-auth-framework-beta');
+let nonce: string;
+
+export async function generateNonce(): Promise<string | void> {
+  nonce = randomBytes(16).toString("hex");
+  return nonce;
+}
 
 export async function loginWithMail(
   email: string,
@@ -12,7 +18,7 @@ export async function loginWithMail(
   try {
     const requestBody = JSON.stringify({ email: email, password: password });
 
-    const response = await fetch(`/api/login`, {
+    const response = await fetch(process.env.ROOT_URL + '/api/login', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +43,7 @@ export async function loginWithMail(
     });
 
     if (response.ok) {
-      redirect("/protected");
+      redirect('/protected');
     } else {
       return json.error;
     }
@@ -50,24 +56,12 @@ export async function loginWithCardano(
   walletID: string,
   isConnected: boolean,
   walletAddress: string,
-  walletNetwork: number
+  walletNetwork: number,
+  key: string,
+  signature: string
 ): Promise<string | void> {
-  let email: string | null = null;
-  let password: string | null = null;
-  let nonce, key, signature;
-  nonce = randomBytes(16).toString("hex");
 
   try {
-    const signResponse = await signMessage(
-      walletID,
-      isConnected,
-      nonce,
-      walletAddress
-    );
-    if (signResponse) {
-      [key, signature] = signResponse;
-    }
-
     // Construct the POST request body dynamically based on the input type
     const requestBody = JSON.stringify({
       walletAddress,
@@ -76,15 +70,14 @@ export async function loginWithCardano(
       key,
       nonce,
     });
-    console.log(requestBody);
-    const response = await fetch(`/api/login`, {
+
+    const response = await fetch(process.env.ROOT_URL + '/api/login', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
-    console.log(response);
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to login with response:", errorText);
@@ -92,10 +85,16 @@ export async function loginWithCardano(
     }
 
     const json = await response.json(); // stuck here
-    console.log(json);
+    cookies().set("Authorization", json.token, {
+      secure: true,
+      httpOnly: true,
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      path: "/",
+      sameSite: "strict",
+    });
 
     if (response.ok) {
-      console.log("login successful");
+      redirect('/protected');
     } else {
       return json.error;
     }

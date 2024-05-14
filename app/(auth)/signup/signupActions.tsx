@@ -1,24 +1,29 @@
-import { redirect } from "next/navigation";
-import { signMessage } from "littlefish-nft-auth-framework-beta";
+"use server";
 import { randomBytes } from "crypto";
+import { redirect } from "next/navigation";
 
-//const { signMessage } = require('littlefish-nft-auth-framework-beta');
+let nonce: string;
+
+export async function generateNonce(): Promise<string | void> {
+  nonce = randomBytes(16).toString("hex");
+  return nonce;
+}
+
 
 export async function signupWithMail(
   email: string,
   password: string
 ): Promise<string | void> {
-  try {
+  //try {
     const requestBody = JSON.stringify({ email: email, password: password });
-
-    const response = await fetch(`/api/signup`, {
+    const response = await fetch(process.env.ROOT_URL + '/api/signup', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
-    console.log(response);
+    //console.log(response);
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to signup with response:", errorText);
@@ -26,42 +31,28 @@ export async function signupWithMail(
     }
 
     const json = await response.json(); // stuck here
-    console.log(json);
+    //console.log(json);
 
     if (response.ok) {
-      console.log("Signup successful");
+      redirect('/login');
     } else {
       return json.error;
     }
-  } catch (error) {
-    console.error("Signup action failed:", error);
-  }
+  //} catch (error) {
+  //  console.error("Signup action failed:", error);
+  //}
 }
 
 export async function signupWithCardano(
   walletID: string,
   isConnected: boolean,
   walletAddress: string,
-  walletNetwork: number
+  walletNetwork: number,
+  key: string,
+  signature: string
 ): Promise<string | void> {
-  let email: string | null = null;
-  let password: string | null = null;
-  let nonce, key, signature;
-  nonce = randomBytes(16).toString("hex");
-
   try {
-    const signResponse = await signMessage(
-      walletID,
-      isConnected,
-      nonce,
-      walletAddress
-    );
-    console.log(signResponse);
-    if (signResponse) {
-      [key, signature] = signResponse;
-    }
-    console.log("Key: ", key);
-
+    console.log("hehe" + walletNetwork)
     // Construct the POST request body dynamically based on the input type
     const requestBody = JSON.stringify({
       walletAddress,
@@ -70,15 +61,15 @@ export async function signupWithCardano(
       key,
       nonce,
     });
-    console.log(requestBody);
-    const response = await fetch(`/api/signup`, {
+    //console.log(requestBody);
+    const response = await fetch(process.env.ROOT_URL + '/api/signup', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
-    console.log(response);
+    //console.log(response);
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to signup with response:", errorText);
@@ -86,10 +77,10 @@ export async function signupWithCardano(
     }
 
     const json = await response.json(); // stuck here
-    console.log(json);
+    //console.log(json);
 
     if (response.ok) {
-      console.log("Signup successful");
+      redirect('/login');
     } else {
       return json.error;
     }

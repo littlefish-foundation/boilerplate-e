@@ -20,7 +20,6 @@ export default function LoginPage() {
     networkID
     } = useWallet();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  console.log("networkID", networkID);
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <button // Changed from Link to button for semantic correctness
