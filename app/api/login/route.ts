@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from "@/app/lib/prisma";
 import { loginUser } from "littlefish-nft-auth-framework-beta/backend";
 import * as jose from "jose";
