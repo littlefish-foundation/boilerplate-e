@@ -7,7 +7,7 @@ import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework-beta";
-
+import { useAuth } from "@/app/AuthContext";
 
 const menuItem = [
   {
@@ -28,58 +28,13 @@ const menuItem = [
   {
     id: 4,
     label: "DAO Tool Map",
-    href: "https://map.littlefish.foundation/"
-  }
+    href: "https://map.littlefish.foundation/",
+  },
 ];
 
 export function SiteHeader() {
   const { isConnected } = useWallet();
-  const mobilenavbarVariant = {
-    initial: {
-      opacity: 0,
-      scale: 1,
-    },
-    animate: {
-      scale: 1,
-      opacity: 1,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
-    exit: {
-      opacity: 0,
-      transition: {
-        duration: 0.2,
-        delay: 0.2,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const mobileLinkVar = {
-    initial: {
-      y: "-20px",
-      opacity: 0,
-    },
-    open: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const containerVariants = {
-    open: {
-      transition: {
-        staggerChildren: 0.06,
-      },
-    },
-  };
-
+  const { user, loading, logout } = useAuth();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
 
   useEffect(() => {
@@ -108,12 +63,15 @@ export function SiteHeader() {
       <header className="fixed left-0 top-0 z-50 w-full translate-y-[-1rem] animate-fade-in border-b opacity-0 backdrop-blur-[12px] [--animation-delay:600ms]">
         <div className="container flex h-[3.5rem] items-center justify-between">
           <Link className="text-md flex items-center" href="/">
-          <img src="logo1.png" alt="Logo" className="w-42 h-10"/>
+            <img src="logo1.png" alt="Logo" className="w-42 h-10" />
           </Link>
           <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
-          {menuItem.map((item) => (
+            {menuItem.map((item) => (
               <motion.li
-                variants={mobileLinkVar}
+                variants={{
+                  initial: { y: "-20px", opacity: 0 },
+                  open: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
+                }}
                 key={item.id}
                 className="flex h-full items-center hover:text-electric-violet-500"
               >
@@ -128,8 +86,42 @@ export function SiteHeader() {
               </motion.li>
             ))}
           </div>
-
           <div className="ml-auto flex h-full items-center">
+            {user ? (
+              <>
+                <span className="mr-6 text-sm">Welcome, {user.name || user.email || user.walletAddress}</span>
+                <button
+                  onClick={logout}
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "mr-6 text-sm"
+                  )}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "mr-6 text-sm"
+                  )}
+                  href="/login"
+                >
+                  Login
+                </Link>
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "mr-6 text-sm"
+                  )}
+                  href="/signup"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
             {isConnected ? (
               <Link
                 className={cn(
@@ -165,7 +157,11 @@ export function SiteHeader() {
         <motion.nav
           initial="initial"
           exit="exit"
-          variants={mobilenavbarVariant}
+          variants={{
+            initial: { opacity: 0, scale: 1 },
+            animate: { scale: 1, opacity: 1, transition: { duration: 0.2, ease: "easeOut" } },
+            exit: { opacity: 0, transition: { duration: 0.2, delay: 0.2, ease: "easeOut" } },
+          }}
           animate={hamburgerMenuIsOpen ? "animate" : "exit"}
           className={`fixed left-0 top-0 z-50 h-screen w-full overflow-auto bg-background/70 backdrop-blur-[12px] pointer-events-none`}
         >
@@ -173,7 +169,6 @@ export function SiteHeader() {
             <Link className="text-md flex items-center" href="/">
               Littlefish Foundation
             </Link>
-
             <button
               className="ml-6 md:hidden"
               onClick={() => setHamburgerMenuIsOpen((open) => !open)}
@@ -184,13 +179,16 @@ export function SiteHeader() {
           </div>
           <motion.ul
             className={`flex flex-col md:flex-row md:items-center uppercase md:normal-case ease-in`}
-            variants={containerVariants}
+            variants={{ open: { transition: { staggerChildren: 0.06 } } }}
             initial="initial"
             animate={hamburgerMenuIsOpen ? "open" : "exit"}
           >
             {menuItem.map((item) => (
               <motion.li
-                variants={mobileLinkVar}
+                variants={{
+                  initial: { y: "-20px", opacity: 0 },
+                  open: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
+                }}
                 key={item.id}
                 className="border-grey-dark pl-6 py-0.5 border-b md:border-none"
               >

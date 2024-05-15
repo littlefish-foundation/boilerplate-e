@@ -3,7 +3,6 @@ import { signupUser } from "littlefish-nft-auth-framework-beta/backend";
 //const { signupUser } = require('littlefish-nft-auth-framework-beta');
 
 export async function POST(request: Request) {
-    console.log("hehe")
     const body = await request.json();
     const {
         email,

@@ -1,6 +1,6 @@
 "use server";
 import { randomBytes } from "crypto";
-import { redirect } from "next/navigation";
+import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-auth-framework-beta/backend";
 
 let nonce: string;
 
@@ -9,82 +9,67 @@ export async function generateNonce(): Promise<string | void> {
   return nonce;
 }
 
+export async function signupWithMail(email: string, password: string): Promise<{ success?: boolean; error?: string }> {
+  const validEmail = validateEmail(email);
+  if (!validEmail) {
+    return { error: "Invalid Email format" };
+  }
+  const validPassword = validatePassword(password);
+  if (!validPassword) {
+    return { error: "Password weak" };
+  }
+  password = hashPassword(password);
+  const requestBody = JSON.stringify({ email: email, password: password });
 
-export async function signupWithMail(
-  email: string,
-  password: string
-): Promise<string | void> {
-  //try {
-    const requestBody = JSON.stringify({ email: email, password: password });
-    const response = await fetch(process.env.ROOT_URL + '/api/signup', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: requestBody,
-    });
-    //console.log(response);
-    if (!response.ok) {
-      const errorText = await response.text(); // Read response as text to see what went wrong
-      console.error("Failed to signup with response:", errorText);
-      return `Error: ${response.statusText}`;
-    }
-
-    const json = await response.json(); // stuck here
-    //console.log(json);
-
-    if (response.ok) {
-      redirect('/login');
-    } else {
-      return json.error;
-    }
-  //} catch (error) {
-  //  console.error("Signup action failed:", error);
-  //}
-}
-
-export async function signupWithCardano(
-  walletID: string,
-  isConnected: boolean,
-  walletAddress: string,
-  walletNetwork: number,
-  key: string,
-  signature: string
-): Promise<string | void> {
   try {
-    console.log("hehe" + walletNetwork)
-    // Construct the POST request body dynamically based on the input type
-    const requestBody = JSON.stringify({
-      walletAddress,
-      walletNetwork,
-      signature,
-      key,
-      nonce,
-    });
-    //console.log(requestBody);
-    const response = await fetch(process.env.ROOT_URL + '/api/signup', {
+    const response = await fetch(`${process.env.ROOT_URL}/api/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
-    //console.log(response);
+
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to signup with response:", errorText);
-      return `Error: ${response.statusText}`;
+      return { error: `Error: ${response.statusText}` };
     }
 
-    const json = await response.json(); // stuck here
-    //console.log(json);
-
-    if (response.ok) {
-      redirect('/login');
-    } else {
-      return json.error;
-    }
+    return { success: true };
   } catch (error) {
     console.error("Signup action failed:", error);
+    return { error: "Signup action failed" };
+  }
+}
+
+export async function signupWithCardano(walletID: string, isConnected: boolean, walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
+  const requestBody = JSON.stringify({
+    walletAddress,
+    walletNetwork,
+    signature,
+    key,
+    nonce,
+  });
+
+  try {
+    const response = await fetch(`${process.env.ROOT_URL}/api/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text(); // Read response as text to see what went wrong
+      console.error("Failed to signup with response:", errorText);
+      return { error: `Error: ${response.statusText}` };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Signup action failed:", error);
+    return { error: "Signup action failed" };
   }
 }

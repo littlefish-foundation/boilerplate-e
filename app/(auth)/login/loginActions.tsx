@@ -1,9 +1,8 @@
 "use server";
-import { randomBytes, sign } from "crypto";
+import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-auth-framework-beta/backend";
 
-//const { signMessage } = require('littlefish-nft-auth-framework-beta');
 let nonce: string;
 
 export async function generateNonce(): Promise<string | void> {
@@ -11,14 +10,20 @@ export async function generateNonce(): Promise<string | void> {
   return nonce;
 }
 
-export async function loginWithMail(
-  email: string,
-  password: string
-): Promise<string | void> {
+export async function loginWithMail(email: string, password: string): Promise<{ success?: boolean; error?: string }> {
   try {
-    const requestBody = JSON.stringify({ email: email, password: password });
+    const validEmail = validateEmail(email);
+    if (!validEmail) {
+      return { error: "Invalid Email format" };
+    }
+    const validPassword = validatePassword(password);
+    if (!validPassword) {
+      return { error: "Weak Password" };
+    }
+    const hashedPassword = hashPassword(password);
+    const requestBody = JSON.stringify({ email, password: hashedPassword });
 
-    const response = await fetch(process.env.ROOT_URL + '/api/login', {
+    const response = await fetch(`${process.env.ROOT_URL}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,76 +34,61 @@ export async function loginWithMail(
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to login with response:", errorText);
-      return `Error: ${response.statusText}`;
+      return { error: `Error: ${response.statusText}` };
     }
 
-    const json = await response.json(); // stuck here
-
+    const json = await response.json();
     cookies().set("Authorization", json.token, {
       secure: true,
       httpOnly: true,
-      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       path: "/",
       sameSite: "strict",
     });
 
-    if (response.ok) {
-      redirect('/protected');
-    } else {
-      return json.error;
-    }
+    return { success: true };
   } catch (error) {
-    console.error("login action failed:", error);
+    console.error("Login action failed:", error);
+    return { error: "Login action failed" };
   }
 }
 
-export async function loginWithCardano(
-  walletID: string,
-  isConnected: boolean,
-  walletAddress: string,
-  walletNetwork: number,
-  key: string,
-  signature: string
-): Promise<string | void> {
+export async function loginWithCardano(walletID: string, isConnected: boolean, walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
+  const requestBody = JSON.stringify({
+    walletAddress,
+    walletNetwork,
+    signature,
+    key,
+    nonce,
+  });
 
   try {
-    // Construct the POST request body dynamically based on the input type
-    const requestBody = JSON.stringify({
-      walletAddress,
-      walletNetwork,
-      signature,
-      key,
-      nonce,
-    });
-
-    const response = await fetch(process.env.ROOT_URL + '/api/login', {
+    const response = await fetch(`${process.env.ROOT_URL}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: requestBody,
     });
+
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to login with response:", errorText);
-      return `Error: ${response.statusText}`;
+      return { error: `Error: ${response.statusText}` };
     }
 
-    const json = await response.json(); // stuck here
+    const json = await response.json();
     cookies().set("Authorization", json.token, {
       secure: true,
       httpOnly: true,
-      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       path: "/",
       sameSite: "strict",
     });
 
-    if (response.ok) {
-      redirect('/protected');
-    } else {
-      return json.error;
-    }
+    return { success: true };
   } catch (error) {
-    console.error("login action failed:", error);
+    console.error("Login action failed:", error);
+    return { error: "Login action failed" };
   }
 }
