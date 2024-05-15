@@ -1,6 +1,6 @@
 "use client"
 import { signupWithMail, signupWithCardano, generateNonce } from "./signupActions";
-import { signMessage } from "littlefish-nft-auth-framework-beta/frontend";
+import { signMessage, WalletConnectButton } from "littlefish-nft-auth-framework-beta/frontend";
 import { useWallet } from "littlefish-nft-auth-framework-beta";
 import { useState } from "react";
 
@@ -59,6 +59,7 @@ export default function SignUpPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
+      <WalletConnectButton />
       <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
         <input
           type="text"
@@ -89,27 +90,9 @@ export default function SignUpPage() {
           >
             Signup with Wallet
           </button>
-          <p className="mb-2 text-gray-300">Connected Wallet: {connectedWalletId}</p>
-          <button 
-            onClick={() => disconnectWallet()}
-            className="w-full p-2 font-semibold text-white bg-red-500 rounded shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            Disconnect Wallet
-          </button>
         </div>
       ) : (
-        wallets.map((wallet: string) => (
-          <button
-            key={wallet}
-            type="submit"
-            onClick={() => {
-              connectWallet(wallet);
-            }}
-            className="w-full max-w-sm p-2 mt-2 font-semibold text-white bg-indigo-500 rounded shadow hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Connect {wallet}
-          </button>
-        ))
+        <h1 className="text-center text-xl mt-4">Connect your wallet to signup</h1>
       )}
     </div>
   );
