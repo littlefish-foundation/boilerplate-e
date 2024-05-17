@@ -21,9 +21,17 @@ export async function POST(request: Request) {
     if (!result.success) {
         return new Response(JSON.stringify({ error: result.error }), { status: 400 });
     }
-
+    try {
     if (result.success) {
         if ( result.email && result.passwordHash ) {
+            const existingUser = await prisma.user.findFirst({
+                where: {
+                    email: result.email,
+                },
+            });
+            if (existingUser) {
+                return new Response(JSON.stringify({ error: "existingUser" }), { status: 400 });
+            }
             await prisma.user.create({
                 data: {
                     email: result.email,
@@ -32,6 +40,14 @@ export async function POST(request: Request) {
                 },
             });
         } else {
+            const existingUser = await prisma.user.findFirst({
+                where: {
+                    walletAddress: result.walletAddress,
+                },
+            });
+            if (existingUser) {
+                return new Response(JSON.stringify({ error: "existingUser" }), { status: 400 });
+            }
             await prisma.user.create({
                 data: {
                     walletAddress: result.walletAddress,
@@ -40,6 +56,10 @@ export async function POST(request: Request) {
                 },
             });
         }
+    }
+    } catch (error) {
+        console.log(error)
+        return new Response(JSON.stringify({ error: error }), { status: 400 });
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });

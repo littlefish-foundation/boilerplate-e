@@ -33,7 +33,10 @@ export async function signupWithMail(email: string, password: string): Promise<{
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to signup with response:", errorText);
-      return { error: `Error: ${response.statusText}` };
+      if (errorText.includes("existingUser")) {
+        return { error: "User already exists" };
+      }
+      return { error: `Error: ${errorText}` };
     }
 
     return { success: true };
@@ -64,6 +67,9 @@ export async function signupWithCardano(walletID: string, isConnected: boolean, 
     if (!response.ok) {
       const errorText = await response.text(); // Read response as text to see what went wrong
       console.error("Failed to signup with response:", errorText);
+      if (errorText.includes("existingUser")) {
+        return { error: "User already exists" };
+      }
       return { error: `Error: ${response.statusText}` };
     }
 
