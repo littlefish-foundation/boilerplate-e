@@ -1,85 +1,97 @@
 "use client";
 import { signupWithMail, signupWithCardano, generateNonce } from "./signupActions";
-import { signMessage, WalletConnectButton } from "littlefish-nft-auth-framework-beta/frontend";
-import { useWallet } from "littlefish-nft-auth-framework-beta";
+import { signMessage, WalletConnectButton, useWallet } from "littlefish-nft-auth-framework-beta/frontend";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { set } from "react-hook-form";
 
+// Function to handle message signing for Cardano wallet
 async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
+  // Generate a nonce for the signing process
   const nonceResponse = await generateNonce();
   if (!nonceResponse) {
-    console.error("Failed to generate nonce");
+    console.error("Failed to generate nonce"); // Log error if nonce generation fails
     return;
   }
 
-  const nonce = nonceResponse;
+  const nonce = nonceResponse; // Store the generated nonce
 
   try {
+    // Sign the nonce with the wallet
     const signResponse = await signMessage(walletID, isConnected, nonce, walletAddress);
     if (!signResponse) {
-      console.error("Failed to sign message");
+      console.error("Failed to sign message"); // Log error if message signing fails
       return;
     }
-    const [key, signature] = signResponse;
-    return [key, signature];
+    const [key, signature] = signResponse; // Destructure key and signature from the response
+    return [key, signature]; // Return the key and signature
   } catch (error) {
-    console.error("Error signing message:", error);
+    console.error("Error signing message:", error); // Log any errors that occur during message signing
   }
 }
 
+// React component for the signup page
 export default function SignUpPage() {
-  const { isConnected, connectedWalletId, networkID, addresses } = useWallet();
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [success, setSuccess] = useState(false);
+  const { isConnected, connectedWalletId, networkID, addresses } = useWallet(); // Destructure wallet connection status and details
+  const router = useRouter(); // Initialize router for navigation
+  const [email, setEmail] = useState(''); // State for email input
+  const [password, setPassword] = useState(''); // State for password input
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [success, setSuccess] = useState(false); // State for success status
 
+  // Function to handle Cardano wallet signup
   async function handleCardanoSignup() {
     if (connectedWalletId !== null) {
       try {
+        // Sign the message using the wallet
+        // The address comes as an array of length 1 usually from the wallet, so we use the first address
         const signResponse = await handleSign(connectedWalletId, isConnected, addresses[0]);
         if (signResponse) {
-          const [key, signature] = signResponse;
+          const [key, signature] = signResponse; // Destructure key and signature from the response
+          // Perform signup with the Cardano wallet details
           const result = await signupWithCardano(connectedWalletId, isConnected, addresses[0], networkID, key, signature);
           if (result.success) {
-            setSuccess(true);
-            setErrorMessage('');
-            router.push("/login");
+            setSuccess(true); // Set success status to true
+            setErrorMessage(''); // Clear error message
+            router.push("/login"); // Navigate to login page
           } else {
-            setErrorMessage(result.error || "Signup failed");
-            setSuccess(false);
+            setErrorMessage(result.error || "Signup failed"); // Set error message if signup fails
+            setSuccess(false); // Set success status to false
           }
         }
       } catch (error) {
-        console.error("Error signing message:", error);
-        setErrorMessage("Error signing message");
-        setSuccess(false);
+        console.error("Error signing message:", error); // Log any errors that occur during message signing
+        setErrorMessage("Error signing message"); // Set error message for signing error
+        setSuccess(false); // Set success status to false
       }
+    } else {
+      setErrorMessage("Wallet not connected"); // Set error message if wallet is not connected
     }
   }
 
+  // Function to handle email signup
   async function handleEmailSignup() {
     try {
+      // Perform signup with email and password
       const result = await signupWithMail(email, password);
       if (result.success) {
-        setSuccess(true);
-        setErrorMessage('');
-        router.push("/login");
+        setSuccess(true); // Set success status to true
+        setErrorMessage(''); // Clear error message
+        router.push("/login"); // Navigate to login page
       } else {
-        setErrorMessage(result.error || "Signup failed");
-        setSuccess(false);
+        setErrorMessage(result.error || "Signup failed"); // Set error message if signup fails
+        setSuccess(false); // Set success status to false
       }
     } catch (error) {
-      console.error("Email signup failed:", error);
-      setErrorMessage("Email signup failed");
-      setSuccess(false);
+      console.error("Email signup failed:", error); // Log any errors that occur during email signup
+      setErrorMessage("Email signup failed"); // Set error message for email signup failure
+      setSuccess(false); // Set success status to false
     }
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
-      <WalletConnectButton />
+      <WalletConnectButton /> {/* Button to connect the wallet */}
       <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
         <input
           type="text"
@@ -119,7 +131,7 @@ export default function SignUpPage() {
           {errorMessage}
         </div>
       )}
-      {success && (
+      {success && ( // Display success message if signup is successful
         <div className="w-full max-w-sm mt-4 p-2 bg-green-500 text-white text-center rounded">
           Signup Successful
         </div>
