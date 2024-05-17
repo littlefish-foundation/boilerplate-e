@@ -1,80 +1,87 @@
 "use client";
 import { loginWithMail, loginWithCardano, generateNonce } from "./loginActions";
-import { useWallet } from "littlefish-nft-auth-framework-beta";
-import { signMessage } from "littlefish-nft-auth-framework-beta/frontend";
+import { signMessage, useWallet } from "littlefish-nft-auth-framework-beta/frontend";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/AuthContext";
 
+// Function to handle message signing for Cardano wallet
 async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
+  // Generate a nonce for the signing process
   const nonceResponse = await generateNonce();
   if (!nonceResponse) {
-    console.error("Failed to generate nonce");
+    console.error("Failed to generate nonce"); // Log error if nonce generation fails
     return;
   }
 
-  const nonce = nonceResponse;
+  const nonce = nonceResponse; // Store the generated nonce
 
   try {
+    // Sign the nonce with the wallet
     const signResponse = await signMessage(walletID, isConnected, nonce, walletAddress);
     if (!signResponse) {
-      console.error("Failed to sign message");
+      console.error("Failed to sign message"); // Log error if message signing fails
       return;
     }
-    const [key, signature] = signResponse;
-    return [key, signature];
+    const [key, signature] = signResponse; // Destructure key and signature from the response
+    return [key, signature]; // Return the key and signature
   } catch (error) {
-    console.error("Error signing message:", error);
+    console.error("Error signing message:", error); // Log any errors that occur during message signing
   }
 }
 
+// React component for the login page
 export default function LoginPage() {
-  const { isConnected, connectedWalletId, connectWallet, disconnectWallet, networkID, addresses, wallets } = useWallet();
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [success, setSuccess] = useState(false);
+  const { isConnected, connectedWalletId, connectWallet, disconnectWallet, networkID, addresses, wallets } = useWallet(); // Destructure wallet connection status and details
+  const router = useRouter(); // Initialize router for navigation
+  const [email, setEmail] = useState(''); // State for email input
+  const [password, setPassword] = useState(''); // State for password input
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [success, setSuccess] = useState(false); // State for success status
 
+  // Function to handle login with Cardano wallet
   async function handleCardanoLogin() {
     if (connectedWalletId !== null) {
       try {
+        // Sign the message using the wallet
         const signResponse = await handleSign(connectedWalletId, isConnected, addresses[0]);
         if (signResponse) {
-          const [key, signature] = signResponse;
+          const [key, signature] = signResponse; // Destructure key and signature from the response
+          // Perform login with the Cardano wallet details
           const result = await loginWithCardano(connectedWalletId, isConnected, addresses[0], networkID, key, signature);
           if (result.success) {
-            setSuccess(true);
-            setErrorMessage('');
-            router.push("/assets");
+            setSuccess(true); // Set success status to true
+            setErrorMessage(''); // Clear error message
+            router.push("/assets"); // Navigate to assets page
           } else {
-            setErrorMessage(result.error || "Login failed");
-            setSuccess(false);
+            setErrorMessage(result.error || "Login failed"); // Set error message if login fails
+            setSuccess(false); // Set success status to false
           }
         }
       } catch (error) {
-        console.error("Failed to handle Cardano login:", error);
-        setErrorMessage("Failed to handle Cardano login");
-        setSuccess(false);
+        console.error("Failed to handle Cardano login:", error); // Log any errors that occur during Cardano login
+        setErrorMessage("Failed to handle Cardano login"); // Set error message for Cardano login failure
+        setSuccess(false); // Set success status to false
       }
     }
   }
 
+  // Function to handle login with email and password
   async function handleEmailLogin() {
     try {
+      // Perform login with email and password
       const result = await loginWithMail(email, password);
       if (result.success) {
-        setSuccess(true);
-        setErrorMessage('');
-        router.push("/assets");
+        setSuccess(true); // Set success status to true
+        setErrorMessage(''); // Clear error message
+        router.push("/assets"); // Navigate to assets page
       } else {
-        setErrorMessage(result.error || "Login failed");
-        setSuccess(false);
+        setErrorMessage(result.error || "Login failed"); // Set error message if login fails
+        setSuccess(false); // Set success status to false
       }
     } catch (error) {
-      console.error("Email login failed:", error);
-      setErrorMessage("Email login failed");
-      setSuccess(false);
+      console.error("Email login failed:", error); // Log any errors that occur during email login
+      setErrorMessage("Email login failed"); // Set error message for email login failure
+      setSuccess(false); // Set success status to false
     }
   }
 
@@ -137,7 +144,7 @@ export default function LoginPage() {
           {errorMessage}
         </div>
       )}
-      {success && (
+      {success && ( // Display success message if login is successful
         <div className="w-full max-w-sm mt-4 p-2 bg-green-500 text-white text-center rounded">
           Login Successful
         </div>
