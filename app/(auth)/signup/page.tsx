@@ -140,8 +140,8 @@ export default function SignUpPage() {
         <div className="flex flex-col gap-2 text-center">
           {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
           <Image
-            className="mx-auto h-128 w-128"
-            src="/logo2.png"
+            className="mx-auto "
+            src="/findthefish.png"
             width={128}
             height={128}
             alt="littlefish logo"

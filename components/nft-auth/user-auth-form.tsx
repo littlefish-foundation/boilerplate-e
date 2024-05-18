@@ -202,48 +202,63 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       </div>
       {isClient && wallets.length > 0 ? (
         <div className="mx-auto grid grid-cols-3 gap-4 sm:w-[350px]">
-          {isConnected ? (
-            <button
-              type="submit"
-              className={cn(buttonVariants())}
-              disabled={isLoading}
-              onClick={() => {
-                disconnectWallet();
-              }}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              disconnect {connectedWalletId}
-            </button>
-          ) : (
-            wallets.map((wallet: string) => (
-              <div>
-                <button
-                  type="submit"
-                  className={cn(buttonVariants({ variant: "outline" }))}
-                  disabled={isLoading}
-                  onClick={() => {
-                    connectWallet(wallet);
-                  }}
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  <div className="group relative flex items-center">
-                    <img
-                      src={window.cardano[wallet].icon}
-                      alt={wallet}
-                      className={`mr-2 h-4 w-4 transition-filter duration-300 group-hover:grayscale-0 ${
-                        !isConnected ? "grayscale" : ""
-                      }`}
-                    />
-                    <span>
-                      {wallet.charAt(0).toUpperCase() + wallet.slice(1)}
-                    </span>
-                  </div>
-                </button>
-              </div>
-            ))
-          )}
+          {isConnected
+            ? wallets.map((wallet: string) => (
+                <div key={wallet}>
+                  <button
+                    type="submit"
+                    className={cn(buttonVariants({ variant: "outline" }))}
+                    disabled={isLoading}
+                    onClick={() => {
+                      disconnectWallet(wallet);
+                    }}
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    <div className="group relative flex items-center">
+                      <img
+                        src={window.cardano[wallet].icon}
+                        alt={wallet}
+                        className={`mr-2 h-4 w-4 transition-filter duration-300 group-hover:grayscale-0 ${
+                          wallet !== connectedWalletId ? "grayscale" : ""
+                        }`} // Corrected condition
+                      />
+                      <span>
+                        {wallet.charAt(0).toUpperCase() + wallet.slice(1)}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              ))
+            : wallets.map((wallet: string) => (
+                <div>
+                  <button
+                    type="submit"
+                    className={cn(buttonVariants({ variant: "outline" }))}
+                    disabled={isLoading}
+                    onClick={() => {
+                      connectWallet(wallet);
+                    }}
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    <div className="group relative flex items-center">
+                      <img
+                        src={window.cardano[wallet].icon}
+                        alt={wallet}
+                        className={`mr-2 h-4 w-4 transition-filter duration-300 group-hover:grayscale-0 ${
+                          !isConnected ? "grayscale" : ""
+                        }`}
+                      />
+                      <span>
+                        {wallet.charAt(0).toUpperCase() + wallet.slice(1)}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              ))}
         </div>
       ) : (
         <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
