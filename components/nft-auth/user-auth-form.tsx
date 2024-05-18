@@ -60,8 +60,6 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     networkID,
   } = useWallet();
 
-  console.log("Cardano", window.cardano);
-
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isGitHubLoading, setIsGitHubLoading] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string>("");
@@ -203,7 +201,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         </div>
       </div>
       {isClient && wallets.length > 0 ? (
-        <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
+        <div className="mx-auto grid grid-cols-3 gap-4 sm:w-[350px]">
           {isConnected ? (
             <button
               type="submit"
@@ -218,18 +216,32 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </button>
           ) : (
             wallets.map((wallet: string) => (
-              <button
-                type="submit"
-                className={cn(buttonVariants())}
-                disabled={isLoading}
-                onClick={() => {
-                  connectWallet(wallet);
-                }}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Connect {wallet}
-                // show wallet icon
-              </button>
+              <div>
+                <button
+                  type="submit"
+                  className={cn(buttonVariants({ variant: "outline" }))}
+                  disabled={isLoading}
+                  onClick={() => {
+                    connectWallet(wallet);
+                  }}
+                >
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  <div className="group relative flex items-center">
+                    <img
+                      src={window.cardano[wallet].icon}
+                      alt={wallet}
+                      className={`mr-2 h-4 w-4 transition-filter duration-300 group-hover:grayscale-0 ${
+                        !isConnected ? "grayscale" : ""
+                      }`}
+                    />
+                    <span>
+                      {wallet.charAt(0).toUpperCase() + wallet.slice(1)}
+                    </span>
+                  </div>
+                </button>
+              </div>
             ))
           )}
         </div>
