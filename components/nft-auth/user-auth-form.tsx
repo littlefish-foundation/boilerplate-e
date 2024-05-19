@@ -70,6 +70,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     try {
       const signInResult = await signupWithMail(data.email, data.password);
 
+      console.log("signInResult", signInResult);
       setIsLoading(false);
 
       if (signInResult.error) {
@@ -187,7 +188,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               }}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In with Email
+              Sign Up
             </button>
           </div>
         </form>
