@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  loginWithCardano: (walletID: string, isConnected: boolean, walletAddress: string, walletNetwork: number, key: string, signature: string) => Promise<void>;
+  loginWithCardano: (walletAddress: string, walletNetwork: number, key: string, signature: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -57,9 +57,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   };
 
-  const handleLoginWithCardano = async (walletID: string, isConnected: boolean, walletAddress: string, walletNetwork: number, key: string, signature: string) => {
+  const handleLoginWithCardano = async ( walletAddress: string, walletNetwork: number, key: string, signature: string) => {
     setLoading(true);
-    const result = await loginWithCardano(walletID, isConnected, walletAddress, walletNetwork, key, signature);
+    const result = await loginWithCardano(walletAddress, walletNetwork, key, signature);
     if (result.success) {
       const userDetails = await getUserDetails(); // Assuming this gets the new user details
       setUser(userDetails);
