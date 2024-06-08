@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useWallet } from "littlefish-nft-auth-framework-beta";
+import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { useAuth } from "@/app/AuthContext";
 
 const menuItem = [

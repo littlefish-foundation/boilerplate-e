@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Asset, useWallet } from "littlefish-nft-auth-framework-beta/frontend";
+import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { BorderBeam } from "@/components/magicui/border-beam";
 
 // Define the CardComponent function component

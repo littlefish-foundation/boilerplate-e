@@ -3,7 +3,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import React from "react";
-import { useWallet } from "littlefish-nft-auth-framework-beta/frontend";
+import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -57,17 +57,17 @@ export default function LoginPage() {
             </button>
           ) : (
             // Display connect button for each available wallet if not connected
-            wallets.map((wallet: string) => (
+            wallets.map((wallet) => (
               <button
                 type="submit"
                 className={cn(buttonVariants())} // Apply button styling
                 disabled={isLoading} // Disable button if loading
                 onClick={() => {
-                  connectWallet(wallet); // Connect wallet on click
+                  connectWallet(wallet.name); // Connect wallet on click
                 }}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {/* Loader icon if loading */}
-                Connect {wallet} {/* Display wallet name */}
+                Connect {wallet.name} {/* Display wallet name */}
               </button>
             ))
           )}

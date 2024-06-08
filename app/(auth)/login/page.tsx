@@ -1,11 +1,20 @@
 "use client";
 import { loginWithMail, loginWithCardano, generateNonce } from "./loginActions";
-import { signMessage, useWallet } from "littlefish-nft-auth-framework-beta/frontend";
+import {
+  Wallet,
+  signMessage,
+  useWallet,
+  Asset,
+} from "littlefish-nft-auth-framework/frontend";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Function to handle message signing for Cardano wallet
-async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
+async function handleSign(
+  walletID: string,
+  isConnected: boolean,
+  walletAddress: string
+): Promise<[string, string] | void> {
   // Generate a nonce for the signing process
   const nonceResponse = await generateNonce();
   if (!nonceResponse) {
@@ -17,7 +26,12 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
 
   try {
     // Sign the nonce with the wallet
-    const signResponse = await signMessage(walletID, isConnected, nonce, walletAddress);
+    const signResponse = await signMessage(
+      walletID,
+      isConnected,
+      nonce,
+      walletAddress
+    );
     if (!signResponse) {
       console.error("Failed to sign message"); // Log error if message signing fails
       return;
@@ -31,26 +45,55 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
 
 // React component for the login page
 export default function LoginPage() {
-  const { isConnected, connectedWalletId, connectWallet, disconnectWallet, networkID, addresses, wallets } = useWallet(); // Destructure wallet connection status and details
+  const {
+    isConnected,
+    connectedWalletId,
+    connectWallet,
+    disconnectWallet,
+    networkID,
+    addresses,
+    wallets,
+    assets,
+  } = useWallet(); // Destructure wallet connection status and details
   const router = useRouter(); // Initialize router for navigation
-  const [email, setEmail] = useState(''); // State for email input
-  const [password, setPassword] = useState(''); // State for password input
-  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+  const [email, setEmail] = useState(""); // State for email input
+  const [password, setPassword] = useState(""); // State for password input
+  const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
 
   // Function to handle login with Cardano wallet
-  async function handleCardanoLogin() {
+  async function handleCardanoLogin(asset?: Asset) {
     if (connectedWalletId !== null) {
       try {
         // Sign the message using the wallet
-        const signResponse = await handleSign(connectedWalletId, isConnected, addresses[0]);
+        const signResponse = await handleSign(
+          connectedWalletId,
+          isConnected,
+          addresses[0]
+        );
         if (signResponse) {
           const [key, signature] = signResponse; // Destructure key and signature from the response
           // Perform login with the Cardano wallet details
-          const result = await loginWithCardano(connectedWalletId, isConnected, addresses[0], networkID, key, signature);
+          let result;
+          if (asset) {
+            result = await loginWithCardano(
+              addresses[0],
+              networkID,
+              key,
+              signature,
+              asset
+            );
+          } else {
+            result = await loginWithCardano(
+              addresses[0],
+              networkID,
+              key,
+              signature
+            );
+          }
           if (result.success) {
             setSuccess(true); // Set success status to true
-            setErrorMessage(''); // Clear error message
+            setErrorMessage(""); // Clear error message
             router.push("/assets"); // Navigate to assets page
           } else {
             setErrorMessage(result.error || "Login failed"); // Set error message if login fails
@@ -72,7 +115,7 @@ export default function LoginPage() {
       const result = await loginWithMail(email, password);
       if (result.success) {
         setSuccess(true); // Set success status to true
-        setErrorMessage(''); // Clear error message
+        setErrorMessage(""); // Clear error message
         router.push("/assets"); // Navigate to assets page
       } else {
         setErrorMessage(result.error || "Login failed"); // Set error message if login fails
@@ -110,32 +153,54 @@ export default function LoginPage() {
         Login with Email
       </button>
       {isConnected ? (
-        <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-          <button
-            onClick={handleCardanoLogin}
-            className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            Login with Wallet
-          </button>
-          <p className="mb-2 text-gray-300">Connected Wallet: {connectedWalletId}</p>
-          <button
-            onClick={disconnectWallet}
-            className="w-full p-2 font-semibold text-white bg-red-500 rounded shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            Disconnect Wallet
-          </button>
-        </div>
+        <>
+          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+            <button
+              onClick={() => handleCardanoLogin()}
+              className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              Login with Wallet
+            </button>
+            <p className="mb-2 text-gray-300">
+              Connected Wallet:{" "}
+              {connectedWalletId === "typhoncip30"
+                ? "Typhon"
+                : connectedWalletId}
+            </p>
+            <button
+              onClick={disconnectWallet}
+              className="w-full p-2 font-semibold text-white bg-red-500 rounded shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              Disconnect Wallet
+            </button>
+          </div>
+          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+            {assets.map((asset) => (
+              <div className="flex items-center justify-between p-2 mb-2 bg-gray-700 rounded">
+                <button
+                  onClick={() => handleCardanoLogin(asset)}
+                  className="text-white"
+                >
+                  {asset.policyID}.{asset.assetName}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
-        wallets.map((wallet: string) => (
+        wallets.map((wallet: Wallet) => (
           <button
-            key={wallet}
+            key={wallet.name}
             type="submit"
             onClick={() => {
-              connectWallet(wallet);
+              connectWallet(wallet.name);
             }}
             className="w-full max-w-sm p-2 mt-2 font-semibold text-white bg-indigo-500 rounded shadow hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            Connect {wallet}
+            <img src={wallet.icon} className="mr-2 w-10 float-right" />
+            <span className="mr-2 w-30 float-left ml-5">
+              Connect {wallet.name === "typhoncip30" ? "Typhon" : wallet.name}
+            </span>
           </button>
         ))
       )}

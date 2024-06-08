@@ -1,5 +1,5 @@
 "use client";
-import { WalletProvider } from "littlefish-nft-auth-framework-beta";
+import { WalletProvider } from "littlefish-nft-auth-framework/frontend";
 import { AuthProvider } from "./AuthContext";
 
 export default function Providers({ children }: any) {

@@ -1,7 +1,8 @@
 "use server";
 import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
-import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-auth-framework-beta/backend";
+import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-auth-framework/backend";
+import { Asset } from "littlefish-nft-auth-framework/frontend";
 
 // Declare a variable to store the nonce
 let nonce: string;
@@ -75,7 +76,7 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
 }
 
 // Function to handle login with Cardano wallet details
-export async function loginWithCardano(walletID: string, isConnected: boolean, walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
+export async function loginWithCardano(walletAddress: string, walletNetwork: number, key: string, signature: string, asset?: Asset): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = JSON.stringify({
     walletAddress,
@@ -83,7 +84,9 @@ export async function loginWithCardano(walletID: string, isConnected: boolean, w
     signature,
     key,
     nonce,
+    asset,
   });
+  console.log(requestBody)
 
   try {
     // Send a POST request to the login API with the request body

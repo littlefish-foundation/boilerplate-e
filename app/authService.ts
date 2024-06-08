@@ -14,9 +14,7 @@ export function logout() {
 // Function to get user details
 export async function getUserDetails(): Promise<User> {
   const token = localStorage.getItem("Authorization");
-  console.log("sikik")
   if (!token) {
-    console.log("amk")
     throw new Error("No token found");
   }
 
