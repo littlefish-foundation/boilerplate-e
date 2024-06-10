@@ -66,10 +66,6 @@ export default function SignUpPage() {
   const [selectedAsset, setSelectedAsset] = useState(null as Asset | null);
 
 
-  const handleAssetSelect = (asset: Asset) => {
-    console.log('Asset selected:', asset);
-    setSelectedAsset(asset);
-  };
 
   // Function to handle asset signup
   async function handleAssetSignup(asset: Asset) {

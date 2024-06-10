@@ -1,9 +1,9 @@
 "use client";
-import { loginWithMail, loginWithCardano, generateNonce } from "./loginActions";
+import { loginWithMail, loginWithCardano, generateNonce, loginWithAsset } from "./loginActions";
 import {
-  Wallet,
   signMessage,
   useWallet,
+  WalletConnectButton,
   Asset,
 } from "littlefish-nft-auth-framework/frontend";
 import { useEffect, useState } from "react";
@@ -48,11 +48,8 @@ export default function LoginPage() {
   const {
     isConnected,
     connectedWalletId,
-    connectWallet,
-    disconnectWallet,
     networkID,
     addresses,
-    wallets,
     assets,
     decodeHexToAscii,
   } = useWallet(); // Destructure wallet connection status and details
@@ -66,7 +63,6 @@ export default function LoginPage() {
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
-      console.log("Decoded assets:", decodedAssets);
     }
   }, [isConnected]);
 
@@ -85,7 +81,7 @@ export default function LoginPage() {
           // Perform login with the Cardano wallet details
           let result;
           if (asset) {
-            result = await loginWithCardano(
+            result = await loginWithAsset(
               addresses[0],
               networkID,
               key,
@@ -139,6 +135,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
+      <WalletConnectButton onAssetSelect={handleCardanoLogin} />
       <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
         <input
           type="text"
@@ -161,7 +158,7 @@ export default function LoginPage() {
       >
         Login with Email
       </button>
-      {isConnected ? (
+      {isConnected && (
         <>
           <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
             <button
@@ -170,49 +167,8 @@ export default function LoginPage() {
             >
               Login with Wallet
             </button>
-            <p className="mb-2 text-gray-300">
-              Connected Wallet:{" "}
-              {connectedWalletId === "typhoncip30"
-                ? "Typhon"
-                : connectedWalletId}
-            </p>
-            <button
-              onClick={disconnectWallet}
-              className="w-full p-2 font-semibold text-white bg-red-500 rounded shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              Disconnect Wallet
-            </button>
-          </div>
-          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-            <p>Login with Asset</p>
-            {assets.length > 0 && decodedAssets.length > 0 && assets.map((asset, index) => (
-              <div className="flex items-center justify-between p-2 mb-2 bg-gray-700 rounded">
-                <button
-                  onClick={() => handleCardanoLogin(asset)}
-                  className="text-white"
-                >
-                  {decodedAssets[index].assetName}
-                </button>
-              </div>
-            ))}
           </div>
         </>
-      ) : (
-        wallets.map((wallet: Wallet) => (
-          <button
-            key={wallet.name}
-            type="submit"
-            onClick={() => {
-              connectWallet(wallet.name);
-            }}
-            className="w-full max-w-sm p-2 mt-2 font-semibold text-white bg-indigo-500 rounded shadow hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <img src={wallet.icon} className="mr-2 w-10 float-right" />
-            <span className="mr-2 w-30 float-left ml-5">
-              Connect {wallet.name === "typhoncip30" ? "Typhon" : wallet.name}
-            </span>
-          </button>
-        ))
       )}
       {errorMessage && ( // Display error message if present
         <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">

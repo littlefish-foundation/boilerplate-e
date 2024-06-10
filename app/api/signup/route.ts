@@ -1,15 +1,18 @@
 import prisma from "@/app/lib/prisma";
 import { signupUser } from "littlefish-nft-auth-framework/backend";
 import { setConfig } from "littlefish-nft-auth-framework/backend";
-import { set } from "react-hook-form";
 
-
-const apiKey = "preprod83j2R9Je9cwAmf0ob5lbtnvSCcY5bqJG";
-const networkId = "preprod";
-setConfig(
-  apiKey,
-  networkId,
-);
+const config = {
+  0: { // preprod
+    apiKey: process.env.PREPROD_API_KEY,
+    networkId: 'preprod',
+  },
+  1: { // mainnet
+    apiKey: process.env.MAINNET_API_KEY,
+    networkId: 'mainnet',
+  },
+  // Add other networks as needed
+};
 // Define the POST function to handle signup requests
 export async function POST(request: Request) {
   try {
@@ -28,6 +31,12 @@ export async function POST(request: Request) {
 
     // Call the signupUser function with the request body and get the result
     const result = await signupUser(body);
+
+    const networkConfig = config[body.walletNetwork as keyof typeof config];
+    if (!networkConfig || !networkConfig.apiKey) {
+      throw new Error("Configuration for the provided network is missing or incomplete.");
+    }
+    setConfig(networkConfig.apiKey, networkConfig.networkId);
 
     // If signupUser function returns an error, return an error response
     if (!result.success) {

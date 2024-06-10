@@ -1,7 +1,19 @@
-import { loginUser } from "littlefish-nft-auth-framework/backend";
+import { loginUser, setConfig } from "littlefish-nft-auth-framework/backend";
 import * as jose from "jose"; // Import the jose library for JWT handling
 import { PrismaClient, User } from "@prisma/client"; // Import PrismaClient and User type
 import { Asset } from "littlefish-nft-auth-framework/frontend"; // Import the Asset type from the frontend
+
+const config = {
+  0: { // preprod
+    apiKey: process.env.PREPROD_API_KEY,
+    networkId: 'preprod',
+  },
+  1: { // mainnet
+    apiKey: process.env.MAINNET_API_KEY,
+    networkId: 'mainnet',
+  },
+  // Add other networks as needed
+};
 
 // Initialize Prisma Client
 const prismaClient = new PrismaClient();
@@ -29,6 +41,12 @@ export async function POST(request: Request) {
       nonce,
       asset,
     } = body;
+
+    const networkConfig = config[walletNetwork as keyof typeof config];
+    if (!networkConfig || !networkConfig.apiKey) {
+      throw new Error("Configuration for the provided network is missing or incomplete.");
+    }
+    setConfig(networkConfig.apiKey, networkConfig.networkId);
 
     // Check if the login is using email and password
     if (email && password) {
