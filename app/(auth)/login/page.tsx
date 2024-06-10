@@ -66,8 +66,9 @@ export default function LoginPage() {
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
+      console.log("Decoded assets:", decodedAssets);
     }
-  }, [assets]);
+  }, [isConnected]);
 
   // Function to handle login with Cardano wallet
   async function handleCardanoLogin(asset?: Asset) {
@@ -184,7 +185,7 @@ export default function LoginPage() {
           </div>
           <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
             <p>Login with Asset</p>
-            {assets.map((asset, index) => (
+            {assets.length > 0 && decodedAssets.length > 0 && assets.map((asset, index) => (
               <div className="flex items-center justify-between p-2 mb-2 bg-gray-700 rounded">
                 <button
                   onClick={() => handleCardanoLogin(asset)}
