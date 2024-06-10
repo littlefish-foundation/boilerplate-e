@@ -6,7 +6,7 @@ import {
   useWallet,
   Asset,
 } from "littlefish-nft-auth-framework/frontend";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Function to handle message signing for Cardano wallet
@@ -54,12 +54,20 @@ export default function LoginPage() {
     addresses,
     wallets,
     assets,
+    decodeHexToAscii,
   } = useWallet(); // Destructure wallet connection status and details
   const router = useRouter(); // Initialize router for navigation
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
+  const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]); // State for decoded assets
+
+  useEffect(() => {
+    if (assets.length > 0) {
+      setDecodedAssets(decodeHexToAscii(assets));
+    }
+  }, [assets]);
 
   // Function to handle login with Cardano wallet
   async function handleCardanoLogin(asset?: Asset) {
@@ -175,13 +183,14 @@ export default function LoginPage() {
             </button>
           </div>
           <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-            {assets.map((asset) => (
+            <p>Login with Asset</p>
+            {assets.map((asset, index) => (
               <div className="flex items-center justify-between p-2 mb-2 bg-gray-700 rounded">
                 <button
                   onClick={() => handleCardanoLogin(asset)}
                   className="text-white"
                 >
-                  {asset.policyID}.{asset.assetName}
+                  {decodedAssets[index].assetName}
                 </button>
               </div>
             ))}

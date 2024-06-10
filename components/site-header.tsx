@@ -7,7 +7,6 @@ import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
-import { useAuth } from "@/app/AuthContext";
 
 const menuItem = [
   {
@@ -34,7 +33,6 @@ const menuItem = [
 
 export function SiteHeader() {
   const { isConnected } = useWallet();
-  const { user, loading, logout } = useAuth();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
 
   useEffect(() => {
@@ -70,7 +68,11 @@ export function SiteHeader() {
               <motion.li
                 variants={{
                   initial: { y: "-20px", opacity: 0 },
-                  open: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
+                  open: {
+                    y: 0,
+                    opacity: 1,
+                    transition: { duration: 0.3, ease: "easeOut" },
+                  },
                 }}
                 key={item.id}
                 className="flex h-full items-center hover:text-electric-violet-500"
@@ -87,41 +89,26 @@ export function SiteHeader() {
             ))}
           </div>
           <div className="ml-auto flex h-full items-center">
-            {user ? (
-              <>
-                <span className="mr-6 text-sm">Welcome, {user.name || user.email || user.walletAddress}</span>
-                <button
-                  onClick={logout}
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                  href="/login"
-                >
-                  Login
-                </Link>
-                <Link
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                  href="/signup"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
+            <>
+              <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/login"
+              >
+                Login
+              </Link>
+              <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/signup"
+              >
+                Sign Up
+              </Link>
+            </>
             {isConnected ? (
               <Link
                 className={cn(
@@ -159,8 +146,15 @@ export function SiteHeader() {
           exit="exit"
           variants={{
             initial: { opacity: 0, scale: 1 },
-            animate: { scale: 1, opacity: 1, transition: { duration: 0.2, ease: "easeOut" } },
-            exit: { opacity: 0, transition: { duration: 0.2, delay: 0.2, ease: "easeOut" } },
+            animate: {
+              scale: 1,
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            },
+            exit: {
+              opacity: 0,
+              transition: { duration: 0.2, delay: 0.2, ease: "easeOut" },
+            },
           }}
           animate={hamburgerMenuIsOpen ? "animate" : "exit"}
           className={`fixed left-0 top-0 z-50 h-screen w-full overflow-auto bg-background/70 backdrop-blur-[12px] pointer-events-none`}
@@ -187,7 +181,11 @@ export function SiteHeader() {
               <motion.li
                 variants={{
                   initial: { y: "-20px", opacity: 0 },
-                  open: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" } },
+                  open: {
+                    y: 0,
+                    opacity: 1,
+                    transition: { duration: 0.3, ease: "easeOut" },
+                  },
                 }}
                 key={item.id}
                 className="border-grey-dark pl-6 py-0.5 border-b md:border-none"

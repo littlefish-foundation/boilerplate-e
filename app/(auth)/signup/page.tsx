@@ -7,8 +7,8 @@ import {
 } from "./signupActions";
 import {
   signMessage,
-  WalletConnectButton,
   useWallet,
+  WalletConnectButton,
   Asset,
 } from "littlefish-nft-auth-framework/frontend";
 import { useState } from "react";
@@ -63,6 +63,13 @@ export default function SignUpPage() {
   const [password, setPassword] = useState(""); // State for password input
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
+  const [selectedAsset, setSelectedAsset] = useState(null as Asset | null);
+
+
+  const handleAssetSelect = (asset: Asset) => {
+    console.log('Asset selected:', asset);
+    setSelectedAsset(asset);
+  };
 
   // Function to handle asset signup
   async function handleAssetSignup(asset: Asset) {
@@ -166,7 +173,7 @@ export default function SignUpPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
       {wallets ? (
-        <WalletConnectButton />
+        <WalletConnectButton onAssetSelect={handleAssetSignup} />
       ) : (
         <p className="text-center text-xl mt-4">no wallets available</p>
       )}
@@ -202,18 +209,6 @@ export default function SignUpPage() {
             >
               Signup with Wallet
             </button>
-          </div>
-          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-            {assets.map((asset) => (
-              <div className="flex items-center justify-between p-2 mb-2 bg-gray-700 rounded">
-                <button
-                  onClick={() => handleAssetSignup(asset)}
-                  className="text-white"
-                >
-                  {asset.policyID}.{asset.assetName}
-                </button>
-              </div>
-            ))}
           </div>
         </>
       ) : (
