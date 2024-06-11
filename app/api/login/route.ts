@@ -45,6 +45,7 @@ export async function POST(request: Request) {
 
     if (!email) {
       const networkConfig = config[walletNetwork as keyof typeof config];
+      console.log('Network Config:', networkConfig); // Add this line
       if (!networkConfig || !networkConfig.apiKey) {
         throw new Error(
           "Configuration for the provided network is missing or incomplete."
@@ -55,7 +56,6 @@ export async function POST(request: Request) {
 
     // Check if the login is using email and password
     if (email && password) {
-      console.log(password)
       // Find the user by email in the database
       user = (await prismaClient.user.findFirst({
         where: {
