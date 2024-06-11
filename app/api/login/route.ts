@@ -4,13 +4,15 @@ import { PrismaClient, User } from "@prisma/client"; // Import PrismaClient and 
 import { Asset } from "littlefish-nft-auth-framework/frontend"; // Import the Asset type from the frontend
 
 const config = {
-  0: { // preprod
+  0: {
+    // preprod
     apiKey: process.env.PREPROD_API_KEY,
-    networkId: 'preprod',
+    networkId: "preprod",
   },
-  1: { // mainnet
+  1: {
+    // mainnet
     apiKey: process.env.MAINNET_API_KEY,
-    networkId: 'mainnet',
+    networkId: "mainnet",
   },
   // Add other networks as needed
 };
@@ -25,7 +27,6 @@ interface UserWithAssets extends User {
 
 // Define the POST function to handle login requests
 export async function POST(request: Request) {
-  try {
     // Parse the incoming JSON request body
     const body = await request.json();
     let user: UserWithAssets | null; // Declare a variable to store the user details
@@ -42,26 +43,31 @@ export async function POST(request: Request) {
       asset,
     } = body;
 
-    const networkConfig = config[walletNetwork as keyof typeof config];
-    if (!networkConfig || !networkConfig.apiKey) {
-      throw new Error("Configuration for the provided network is missing or incomplete.");
+    if (!email) {
+      const networkConfig = config[walletNetwork as keyof typeof config];
+      if (!networkConfig || !networkConfig.apiKey) {
+        throw new Error(
+          "Configuration for the provided network is missing or incomplete."
+        );
+      }
+      setConfig(networkConfig.apiKey, networkConfig.networkId);
     }
-    setConfig(networkConfig.apiKey, networkConfig.networkId);
 
     // Check if the login is using email and password
     if (email && password) {
+      console.log(password)
       // Find the user by email in the database
-      user = await prismaClient.user.findFirst({
+      user = (await prismaClient.user.findFirst({
         where: {
           email,
         },
         include: {
           assets: true,
         },
-      }) as UserWithAssets;
+      })) as UserWithAssets;
     } else if (walletAddress) {
       // Find the user by wallet address in the database
-      user = await prismaClient.user.findFirst({
+      user = (await prismaClient.user.findFirst({
         where: {
           walletAddress,
           walletNetwork,
@@ -69,7 +75,7 @@ export async function POST(request: Request) {
         include: {
           assets: true,
         },
-      }) as UserWithAssets;
+      })) as UserWithAssets;
     } else {
       // If no login method is provided, return an error response
       return new Response(JSON.stringify({ error: "Invalid login method" }), {
@@ -143,11 +149,4 @@ export async function POST(request: Request) {
 
     // Return a response with the signed JWT
     return new Response(JSON.stringify({ token: jwt }), { status: 200 });
-  } catch (error) {
-    // Handle any unexpected errors
-    console.error("Error handling login request:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-    });
-  }
 }

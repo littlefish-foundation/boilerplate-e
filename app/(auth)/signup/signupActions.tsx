@@ -26,9 +26,8 @@ export async function signupWithMail(email: string, password: string): Promise<{
   if (!validPassword) {
     return { error: "Password weak" };
   }
-
+  
   // Hash the provided password
-  password = hashPassword(password);
   // Create a JSON request body with the email and hashed password
   const requestBody = JSON.stringify({ email: email, password: password });
 

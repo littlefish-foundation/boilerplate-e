@@ -33,9 +33,8 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
     }
 
     // Hash the provided password
-    const hashedPassword = hashPassword(password);
     // Create a JSON request body with the email and hashed password
-    const requestBody = JSON.stringify({ email, password: hashedPassword });
+    const requestBody = JSON.stringify({ email, password });
 
     // Send a POST request to the login API with the request body
     const response = await fetch(`${process.env.ROOT_URL}/api/login`, {
