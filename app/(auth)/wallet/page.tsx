@@ -92,7 +92,7 @@ export default function LoginPage() {
                 <div className="group relative flex items-center">
                       <img
                         src={wallets.find((wallet) => wallet.name === connectedWalletId)?.icon}
-                        alt={connectedWalletId}
+                        alt={connectedWalletId || 'default-alt-text'}
                         className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
                           wallets.find((wallet) => wallet.name !== connectedWalletId) ? "grayscale" : ""
                         }`} // Corrected condition
