@@ -14,7 +14,10 @@ export async function generateNonce(): Promise<string | void> {
 }
 
 // Function to handle signup with email and password
-export async function signupWithMail(email: string, password: string): Promise<{ success?: boolean; error?: string }> {
+export async function signupWithMail(
+  email: string,
+  password: string
+): Promise<{ success?: boolean; error?: string }> {
   // Validate the provided email format
   const validEmail = validateEmail(email);
   if (!validEmail) {

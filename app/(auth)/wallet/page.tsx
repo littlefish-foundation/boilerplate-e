@@ -19,7 +19,7 @@ export default function LoginPage() {
     disconnectWallet,
     wallets,
     connectedWalletId,
-    isClient
+    isClient,
   } = useWallet(); // Destructure wallet connection status and details from useWallet hook
   const [isLoading, setIsLoading] = React.useState<boolean>(false); // State for loading status
 
@@ -32,7 +32,8 @@ export default function LoginPage() {
           "absolute left-4 top-4 md:left-8 md:top-8 flex items-center"
         )}
       >
-        <ChevronLeft className="mr-2 h-4 w-4" /> {/* ChevronLeft icon for back button */}
+        <ChevronLeft className="mr-2 h-4 w-4" />{" "}
+        {/* ChevronLeft icon for back button */}
         Back
       </button>
       {isClient && wallets && wallets.length > 0 ? (
@@ -101,7 +102,6 @@ export default function LoginPage() {
                       {connectedWalletId}
                       </span>
                     </div>
-                
               </button>
             ) : (
               // Display connect button for each available wallet if not connected
@@ -157,7 +157,8 @@ export default function LoginPage() {
             </h1> {/* Welcome heading */}
             <p className="text-sm text-muted-foreground">
               You do not have any wallet available
-            </p> {/* Message indicating no wallets available */}
+            </p>{" "}
+            {/* Message indicating no wallets available */}
           </div>
           <div className="flex flex-col gap-2 text-center">
             <Link href="https://welcome.dexhunter.io/#wallet" passHref>

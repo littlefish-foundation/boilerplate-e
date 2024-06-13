@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -6,6 +6,7 @@ import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
 import { useEffect, useState } from "react";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -26,27 +27,28 @@ const Dynamic = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
-        )}
-      >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <Dynamic>
-            <Providers>{children}</Providers>
-          </Dynamic>
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
+    <SessionWrapper>
+      <html lang="en">
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable
+          )}
+        >
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <Dynamic>
+              <Providers>{children}</Providers>
+            </Dynamic>
+            <Toaster />
+          </ThemeProvider>
+        </body>
+      </html>
+    </SessionWrapper>
   );
 }

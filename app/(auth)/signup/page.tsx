@@ -281,12 +281,10 @@ export default function SignUpPage() {
         <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">
           {errorMessage}
         </div>
-      )}
-      {success && ( // Display success message if signup is successful
-        <div className="w-full max-w-sm mt-4 p-2 bg-green-500 text-white text-center rounded">
-          Signup Successful
+        <div className="flex flex-col gap-4">
+          <UserAuthForm />
         </div>
-      )}
+      </div>
     </div>
     </div>
   </div>

@@ -43,7 +43,6 @@ export async function POST(request: Request) {
     setConfig(networkConfig.apiKey, networkConfig.networkId);
   }
   const result = await signupUser(body);
-
   // If signupUser function returns an error, return an error response
   if (!result.success) {
     return new Response(JSON.stringify({ error: result.error }), {
