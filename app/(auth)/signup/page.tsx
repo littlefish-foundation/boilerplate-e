@@ -242,6 +242,7 @@ export default function SignUpPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        
         <input
           type="password"
           placeholder="Password"
