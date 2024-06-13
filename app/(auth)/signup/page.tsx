@@ -198,16 +198,7 @@ export default function SignUpPage() {
               Sign up for an account
             </p>
           </div>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                WEB2
-              </span>
-            </div>
-          </div>
+          
           <div className="flex flex-col gap-4">
             To be filled later with login form
           </div>
@@ -232,7 +223,18 @@ export default function SignUpPage() {
       )}
       {/* Button to connect the wallet */}
       <div className={cn("grid gap-6")}>
-      <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
+      <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                WEB2
+              </span>
+            </div>
+          </div>
+      <form >
+      <div className="grid gap-4">
         <input
           type="text"
           placeholder="Email"
@@ -247,11 +249,12 @@ export default function SignUpPage() {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        </div>
       </form>
       
       <button
         onClick={handleEmailSignup}
-        
+        className={cn(buttonVariants({ variant: "outline" }))}
         
       >
         Signup with Email
