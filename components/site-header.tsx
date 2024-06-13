@@ -6,8 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useWallet } from "littlefish-nft-auth-framework-beta";
-import { useAuth } from "@/app/AuthContext";
+import { useWallet } from "littlefish-nft-auth-framework/frontend";
 
 const menuItem = [
   {
@@ -34,7 +33,6 @@ const menuItem = [
 
 export function SiteHeader() {
   const { isConnected } = useWallet();
-  const { user, loading, logout } = useAuth();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
 
   useEffect(() => {
@@ -91,43 +89,26 @@ export function SiteHeader() {
             ))}
           </div>
           <div className="ml-auto flex h-full items-center">
-            {user ? (
-              <>
-                <span className="mr-6 text-sm">
-                  Welcome, {user.name || user.email || user.walletAddress}
-                </span>
-                <button
-                  onClick={logout}
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                  href="/login"
-                >
-                  Login
-                </Link>
-                <Link
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "mr-6 text-sm"
-                  )}
-                  href="/signup"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
+            <>
+              <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/login"
+              >
+                Login
+              </Link>
+              <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/signup"
+              >
+                Sign Up
+              </Link>
+            </>
             {isConnected ? (
               <Link
                 className={cn(
