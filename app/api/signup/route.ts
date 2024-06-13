@@ -33,7 +33,9 @@ export async function POST(request: Request) {
   body.authPolicyStrict = false;
 
   // Call the signupUser function with the request body and get the result
-  if (!body.email) {
+  const result = await signupUser(body);
+  console.log(result);
+  if (!result.email) {
     const networkConfig = config[body.walletNetwork as keyof typeof config];
     if (!networkConfig || !networkConfig.apiKey) {
       throw new Error(
@@ -42,7 +44,6 @@ export async function POST(request: Request) {
     }
     setConfig(networkConfig.apiKey, networkConfig.networkId);
   }
-  const result = await signupUser(body);
   // If signupUser function returns an error, return an error response
   if (!result.success) {
     return new Response(JSON.stringify({ error: result.error }), {
@@ -51,13 +52,16 @@ export async function POST(request: Request) {
   }
 
   if (result.email && result.passwordHash) {
+    console.log("0");
     // Check if a user with the given email already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         email: result.email,
       },
     });
+    console.log("1" + existingUser);
     if (existingUser) {
+      console.log("2");
       // Return a 400 response if the email already exists
       return new Response(JSON.stringify({ error: "existingUser" }), {
         status: 400,
