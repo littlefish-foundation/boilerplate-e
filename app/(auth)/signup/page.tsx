@@ -219,10 +219,10 @@ export default function SignUpPage() {
         buttonClassName={cn(buttonVariants({ variant: "outline" }))}
         imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}/>
       ) : (
-        <p className="text-center text-xl mt-4">no wallets available</p>
+        <p className="text-center text-xl mt-4"> no wallets available</p>
       )}
       {/* Button to connect the wallet */}
-      <div className={cn("grid gap-6")}>
+      <div className={cn("grid gap-6")}> 
       <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
