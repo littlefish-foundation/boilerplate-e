@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { UserAuthForm } from "@/components/nft-auth/user-auth-form";
 
 // Function to handle message signing for Cardano wallet
 async function handleSign(
@@ -67,8 +68,6 @@ export default function SignUpPage() {
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
   const [selectedAsset, setSelectedAsset] = useState(null as Asset | null);
-
-
 
   // Function to handle asset signup
   async function handleAssetSignup(asset: Asset) {
@@ -178,52 +177,57 @@ export default function SignUpPage() {
           "absolute left-4 top-4 md:left-8 md:top-8 flex items-center"
         )}
       >
-        <ChevronLeft className="mr-2 h-4 w-4" /> {/* ChevronLeft icon for back button */}
+        <ChevronLeft className="mr-2 h-4 w-4" />{" "}
+        {/* ChevronLeft icon for back button */}
         Back
       </button>
       <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
-          <div className="flex flex-col gap-2 text-center">
-            {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
-            <img
-              className="mx-auto"
-              src="/findtheblackfish.png"
-              width={128}
-              height={128}
-              alt="littlefish logo"
-            />
-            <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Hey littlefish!
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Sign up for an account
-            </p>
+        <div className="flex flex-col gap-2 text-center">
+          {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
+          <img
+            className="mx-auto"
+            src="/findtheblackfish.png"
+            width={128}
+            height={128}
+            alt="littlefish logo"
+          />
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Hey littlefish!
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Sign up for an account
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          To be filled later with login form
+        </div>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
           </div>
-          
-          <div className="flex flex-col gap-4">
-            To be filled later with login form
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              WEB3
+            </span>
           </div>
+        </div>
+      </div>
+      <div className="mx-auto grid grid-cols-1 gap-4 sm:w-[350px]">
+        {wallets ? (
+          <WalletConnectButton
+            onAssetSelect={handleAssetSignup}
+            div1ClassName="flex flex-col gap-2 text-center"
+            div2ClassName="mx-auto grid gap-4 sm:w-[200px]"
+            buttonClassName={cn(buttonVariants({ variant: "outline" }))}
+            imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}
+          />
+        ) : (
+          <p className="text-center text-xl mt-4"> no wallets available</p>
+        )}
+        {/* Button to connect the wallet */}
+        <div className={cn("grid gap-6")}>
           <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                WEB3
-              </span>
-            </div>
-          </div>
-    <div className="mx-auto grid grid-cols-1 gap-4 sm:w-[350px]">
-      {wallets ? (
-        <WalletConnectButton onAssetSelect={handleAssetSignup} div1ClassName="flex flex-col gap-2 text-center"
-        div2ClassName="mx-auto grid gap-4 sm:w-[200px]"
-        buttonClassName={cn(buttonVariants({ variant: "outline" }))}
-        imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}/>
-      ) : (
-        <p className="text-center text-xl mt-4"> no wallets available</p>
-      )}
-      {/* Button to connect the wallet */}
-      <div className={cn("grid gap-6")}> 
-      <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
@@ -233,60 +237,60 @@ export default function SignUpPage() {
               </span>
             </div>
           </div>
-      <form >
-      <div className="grid gap-4">
-        <input
-          type="text"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+          <form>
+            <div className="grid gap-4">
+              <input
+                type="text"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </form>
+
+          <button
+            onClick={handleEmailSignup}
+            className={cn(buttonVariants({ variant: "outline" }))}
+          >
+            Signup with Email
+          </button>
         </div>
-      </form>
-      
-      <button
-        onClick={handleEmailSignup}
-        className={cn(buttonVariants({ variant: "outline" }))}
-        
-      >
-        Signup with Email
-      </button>
-      </div>
-      {isConnected ? (
-        <>
-          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-            <button
-              onClick={() => handleCardanoSignup()}
-              className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              Signup with Wallet
-            </button>
+        {isConnected ? (
+          <>
+            <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+              <button
+                onClick={() => handleCardanoSignup()}
+                className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                Signup with Wallet
+              </button>
+            </div>
+          </>
+        ) : (
+          <h1 className="text-center text-xl mt-4">
+            Connect your wallet to signup
+          </h1>
+        )}
+        {errorMessage && ( // Display error message if present
+          <div>
+            <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">
+              {errorMessage}
+            </div>
+            <div className="flex flex-col gap-4">
+              <UserAuthForm />
+            </div>
           </div>
-        </>
-      ) : (
-        <h1 className="text-center text-xl mt-4">
-          Connect your wallet to signup
-        </h1>
-      )}
-      {errorMessage && ( // Display error message if present
-        <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">
-          {errorMessage}
-        </div>
-        <div className="flex flex-col gap-4">
-          <UserAuthForm />
-        </div>
+        )}
       </div>
     </div>
-    </div>
-  </div>
   );
 }
