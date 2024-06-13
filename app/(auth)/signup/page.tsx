@@ -13,6 +13,9 @@ import {
 } from "littlefish-nft-auth-framework/frontend";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 // Function to handle message signing for Cardano wallet
 async function handleSign(
@@ -167,13 +170,68 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
+    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <button
+        onClick={() => router.back()} // Use router.back to navigate to the previous page
+        className={cn(
+          buttonVariants({ variant: "ghost" }), // Apply ghost variant styling to the button
+          "absolute left-4 top-4 md:left-8 md:top-8 flex items-center"
+        )}
+      >
+        <ChevronLeft className="mr-2 h-4 w-4" /> {/* ChevronLeft icon for back button */}
+        Back
+      </button>
+      <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
+          <div className="flex flex-col gap-2 text-center">
+            {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
+            <img
+              className="mx-auto"
+              src="/findtheblackfish.png"
+              width={128}
+              height={128}
+              alt="littlefish logo"
+            />
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              Hey littlefish!
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Sign up for an account
+            </p>
+          </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                WEB2
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            To be filled later with login form
+          </div>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                WEB3
+              </span>
+            </div>
+          </div>
+    <div className="mx-auto grid grid-cols-1 gap-4 sm:w-[350px]">
       {wallets ? (
-        <WalletConnectButton onAssetSelect={handleAssetSignup} />
+        <WalletConnectButton onAssetSelect={handleAssetSignup} div1ClassName="flex flex-col gap-2 text-center"
+        div2ClassName="mx-auto grid gap-4 sm:w-[200px]"
+        buttonClassName={cn(buttonVariants({ variant: "outline" }))}
+        imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}/>
       ) : (
         <p className="text-center text-xl mt-4">no wallets available</p>
       )}
       {/* Button to connect the wallet */}
+      <div className={cn("grid gap-6")}>
       <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
         <input
           type="text"
@@ -190,12 +248,15 @@ export default function SignUpPage() {
           className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </form>
+      
       <button
         onClick={handleEmailSignup}
-        className="w-full max-w-sm p-2 mt-4 font-semibold text-white bg-blue-500 rounded shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        
+        
       >
         Signup with Email
       </button>
+      </div>
       {isConnected ? (
         <>
           <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
@@ -223,5 +284,7 @@ export default function SignUpPage() {
         </div>
       )}
     </div>
+    </div>
+  </div>
   );
 }
