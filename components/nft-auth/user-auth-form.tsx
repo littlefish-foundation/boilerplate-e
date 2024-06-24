@@ -8,9 +8,9 @@ import {
 import {
   signMessage,
   WalletConnectButton,
-} from "littlefish-nft-auth-framework-beta/frontend";
+} from "littlefish-nft-auth-framework/frontend";
 
-import { useWallet } from "littlefish-nft-auth-framework-beta";
+import { useWallet } from "littlefish-nft-auth-framework/frontend";
 
 import { buttonVariants } from "@/components/ui/button";
 import {

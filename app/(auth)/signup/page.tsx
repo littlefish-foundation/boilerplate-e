@@ -216,10 +216,6 @@ export default function SignUpPage() {
           {wallets ? (
             <WalletConnectButton
               onAssetSelect={handleAssetSignup}
-              div1ClassName="flex flex-col gap-2 text-center"
-              div2ClassName="mx-auto grid gap-4 sm:w-[200px]"
-              buttonClassName={cn(buttonVariants({ variant: "outline" }))}
-              imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}
             />
           ) : (
             <p className="text-center text-xl mt-4"> no wallets available</p>
