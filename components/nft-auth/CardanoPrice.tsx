@@ -28,21 +28,18 @@ const CardanoPrice: FC = () => {
   const formattedPrice = price ? `$${price.toFixed(4)}` : 'Loading...';
 
   return (
-    <div className="relative flex h-full w-full max-w-[32rem] items-center justify-center overflow-hidden rounded-lg border bg-background p-10 md:shadow-xl">
+    <section
+      id="CardanoPrice"
+      className="relative mx-auto mt-12 max-w-[80rem] px-6 text-center md:px-8"
+    >
+    <div className="flex  items-center justify-center">
+      
       <p className="z-10 whitespace-pre-wrap text-center text-2xl font-medium tracking-tighter text-black dark:text-white">
         {formattedPrice}
       </p>
-      <AnimatedGridPattern
-        numSquares={30}
-        maxOpacity={0.5}
-        duration={3}
-        repeatDelay={1}
-        className={cn(
-          "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
-        )}
-      />
+      
     </div>
+    </section>
   );
 };
 
