@@ -1,48 +1,63 @@
-import { buttonVariants } from "@/components/ui/button";
-import { UserAuthForm } from "@/components/nft-auth/user-auth-form";
-import { cn } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
-import { Metadata } from "next";
-import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Login | Magic UI",
-  description: "Login to your account",
-};
+"use client";
+import { useWallet } from "littlefish-nft-auth-framework/frontend";
 
 export default function LoginPage() {
+  const { isConnected, connectedWallet, connectWallet, disconnectWallet, networkID, addresses, assets, wallets, decodeHexToAscii } = useWallet();
+  console.log("isConnected", isConnected);
+
+
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Link
-        href="/"
-        className={cn(
-          buttonVariants({ variant: "ghost" }),
-          "absolute left-4 top-4 md:left-8 md:top-8"
-        )}
-      >
-        <>
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back
-        </>
-      </Link>
-      <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
-        <div className="flex flex-col gap-2 text-center">
-          {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Welcome back
-          </h1>
-          <p className="text-sm text-muted-foreground">Login to your account</p>
-        </div>
-        <UserAuthForm />
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          <Link
-            href="/signup"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            Don&apos;t have an account? Sign Up
-          </Link>
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Login</h2>
+          <div className="mb-4">
+            {!isConnected ? (wallets.map(
+              (wallet) => {
+                return (
+                  <button className="block text-gray-700 text-sm font-bold mb-2" onClick={() => connectWallet(wallet)}>
+                    Connect {wallet.name}
+                  </button>
+                );
+              }
+
+            )) : <button className="block text-gray-700 text-sm font-bold mb-2" onClick={() => disconnectWallet()}>Disconnect Wallet</button>}
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+              Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Username"
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="******************"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Sign In
+            </button>
+            <a
+              className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+              href="#"
+            >
+              Forgot Password?
+            </a>
+          </div>
       </div>
     </div>
   );
+
 }
