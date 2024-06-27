@@ -8,10 +8,10 @@ declare module "next-auth" {
    * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
 
-  interface user {
-    id: string;
-    name: string | null;
-    email: string | null;
+  interface User {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
     emailVerified: Date | null;
     password: string | null;
     walletAddress: string | null;
