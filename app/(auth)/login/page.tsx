@@ -59,6 +59,7 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]); // State for decoded assets
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (assets.length > 0) {
@@ -169,6 +170,29 @@ export default function LoginPage() {
               Login with Wallet
             </button>
           </div>
+          {!isDropdownOpen ? (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+            <button className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" onClick={() => setIsDropdownOpen(true)}>
+              Login With Assets
+            </button>
+          </div>) : (
+            <>
+              {
+                decodedAssets.length === 0 ? (<div>No Asset Found</div>) : (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+                  {decodedAssets.map((asset, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleCardanoLogin(asset)}
+                      className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      {asset.assetName}
+                    </button>
+                  ))}
+                </div>)
+              }
+            </>
+
+          )}
+
         </>
       )}
       {errorMessage && ( // Display error message if present

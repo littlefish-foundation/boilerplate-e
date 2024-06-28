@@ -41,9 +41,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   adapter: PrismaAdapter(prisma) as Adapter,
   callbacks: {
-    session: async ({ session, user }) => {
-      session.user.walletAddress = user.walletAddress as string;
-      session.user.walletNetwork = user.walletNetwork as number;
+    async jwt({ token, user }) {
+      if (user) {
+        token.walletAddress = user.walletAddress;
+        token.walletNetwork = user.walletNetwork;
+        token.verifiedPolicy = user.verifiedPolicy;
+      }
+      return token;
+    },
+    session: async ({ session, token }) => {
+      session.user.walletAddress = token.walletAddress as string;
+      session.user.walletNetwork = token.walletNetwork as number;
+      session.user.verifiedPolicy = token.verifiedPolicy as string;
       return session;
     },
   },
@@ -64,19 +73,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials) {
           throw new Error("No credentials provided");
         }
+
+        const walletAddress = credentials.walletAddress as string;
+        const walletNetwork = parseInt(
+          credentials.walletNetwork as string,
+          10
+        );
+        const signature = credentials.signature as string;
+        const key = credentials.key as string;
+        const nonce = credentials.nonce as string;
         if (
           !credentials.policyID ||
           !credentials.assetName ||
           !credentials.amount
         ) {
-          const walletAddress = credentials.walletAddress as string;
-          const walletNetwork = parseInt(
-            credentials.walletNetwork as string,
-            10
-          );
-          const signature = credentials.signature as string;
-          const key = credentials.key as string;
-          const nonce = credentials.nonce as string;
 
           const user = await prisma.user.findUnique({
             where: {
@@ -104,18 +114,46 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           } else {
             throw new Error("Invalid credentials");
           }
+        } else {
+          const asset = { policyID: credentials.policyID as string, assetName: credentials.assetName as string, amount: credentials.amount as number };
+          const assets = [asset];
+
+          const user = await prisma.user.findUnique({
+            where: {
+              walletAddress: walletAddress,
+            }, include: {
+              assets: true,
+            },
+          });
+
+          if (!user) {
+            throw new Error("No user found");
+          }
+
+          const sanitizedAsset = user.assets.find((matchingAsset) => matchingAsset.policyID === asset.policyID && matchingAsset.assetName === asset.assetName);
+
+          const sanitizedUser = {
+            stakeAddress: user.walletAddress as string,
+            walletNetwork: user.walletNetwork as number,
+            asset: sanitizedAsset,
+          };
+
+          const isValid = await loginUser(sanitizedUser, {
+            stakeAddress: walletAddress,
+            walletNetwork,
+            signature,
+            key,
+            nonce,
+            assets,
+          });
+          console.log("isValid", isValid);
+          if (isValid.success) {
+            return user;
+          } else {
+            throw new Error("Invalid credentials");
+          }
         }
-        const walletAddress = credentials.walletAddress as string;
-        const walletNetwork = parseInt(credentials.walletNetwork as string, 10);
-        const signature = credentials.signature as string;
-        const key = credentials.key as string;
-        const nonce = credentials.nonce as string;
-        const asset = {
-          policyID: credentials.policyID as String,
-          assetName: credentials.assetName as String,
-          amount: parseInt(credentials.amount as string, 10),
-        };
-      },
+      }
     }),
   ],
 });
