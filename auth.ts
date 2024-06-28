@@ -12,18 +12,28 @@ declare module "next-auth" {
     id?: string;
     name?: string | null;
     email?: string | null;
-    emailVerified: Date | null;
-    password: string | null;
-    walletAddress: string | null;
-    walletAddressVerified: Date | null;
-    walletNetwork: number | null;
-    verifiedPolicy: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-}
+    emailVerified?: Date | null;
+    password?: string | null;
+    walletAddress?: string | null;
+    walletAddressVerified?: Date | null;
+    walletNetwork?: number | null;
+    verifiedPolicy?: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }
+
+  interface Session {
+    user: {
+      walletAddress: string;
+      walletNetwork: number;
+    } & DefaultSession["user"];
+  }
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  session: {
+    strategy: "jwt",
+  },
   providers: [Credentials({
     name: "Cardano Wallet",
     credentials: {
@@ -37,13 +47,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!credentials) {
         throw new Error("No credentials provided");
       }
+      /*
       const { walletAddress, walletNetwork, signature, key, nonce } = credentials as {
         walletAddress: string;
         walletNetwork: number;
         signature: string;
         key: string;
         nonce: string;
-      };
+      };*/
+      const walletAddress = credentials.walletAddress as string;
+      const walletNetwork = parseInt(credentials.walletNetwork as unknown as string, 10);
+      const signature = credentials.signature as string;
+      const key = credentials.key as string;
+      const nonce = credentials.nonce as string;
 
       const user = await prisma.user.findUnique({
         where: {

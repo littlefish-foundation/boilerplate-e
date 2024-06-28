@@ -47,7 +47,7 @@ async function handleSign(
 export default function LoginPage() {
   const {
     isConnected,
-    connectedWalletId,
+    connectedWallet,
     networkID,
     addresses,
     assets,
@@ -68,11 +68,11 @@ export default function LoginPage() {
 
   // Function to handle login with Cardano wallet
   async function handleCardanoLogin(asset?: Asset) {
-    if (connectedWalletId !== null) {
+    if (connectedWallet) {
       try {
         // Sign the message using the wallet
         const signResponse = await handleSign(
-          connectedWalletId,
+          connectedWallet.name,
           isConnected,
           addresses[0]
         );
@@ -96,9 +96,10 @@ export default function LoginPage() {
               signature
             );
           }
-          if (result.success) {
+          if (result) {
             setSuccess(true); // Set success status to true
             setErrorMessage(""); // Clear error message
+            console.log("result", result);
             router.push("/assets"); // Navigate to assets page
           } else {
             setErrorMessage(result.error || "Login failed"); // Set error message if login fails
