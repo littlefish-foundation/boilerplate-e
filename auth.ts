@@ -113,7 +113,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const asset = {
           policyID: credentials.policyID as String,
           assetName: credentials.assetName as String,
-          amount: credentials.amount as Number,
+          amount: parseInt(credentials.amount as string, 10),
         };
       },
     }),
