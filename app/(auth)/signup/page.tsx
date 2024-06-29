@@ -16,7 +16,6 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { UserAuthForm } from "@/components/nft-auth/user-auth-form";
 
 // Function to handle message signing for Cardano wallet
 async function handleSign(
@@ -56,7 +55,7 @@ async function handleSign(
 export default function SignUpPage() {
   const {
     isConnected,
-    connectedWalletId,
+    connectedWallet,
     networkID,
     addresses,
     wallets,
@@ -71,12 +70,12 @@ export default function SignUpPage() {
 
   // Function to handle asset signup
   async function handleAssetSignup(asset: Asset) {
-    if (connectedWalletId !== null) {
+    if (connectedWallet) {
       try {
         // Sign the message using the wallet
         // The address comes as an array of length 1 usually from the wallet, so we use the first address
         const signResponse = await handleSign(
-          connectedWalletId,
+          connectedWallet.name,
           isConnected,
           addresses[0]
         );
@@ -111,12 +110,12 @@ export default function SignUpPage() {
 
   // Function to handle Cardano wallet signup
   async function handleCardanoSignup() {
-    if (connectedWalletId !== null) {
+    if (connectedWallet) {
       try {
         // Sign the message using the wallet
         // The address comes as an array of length 1 usually from the wallet, so we use the first address
         const signResponse = await handleSign(
-          connectedWalletId,
+          connectedWallet.name,
           isConnected,
           addresses[0]
         );
@@ -216,10 +215,6 @@ export default function SignUpPage() {
           {wallets ? (
             <WalletConnectButton
               onAssetSelect={handleAssetSignup}
-              div1ClassName="flex flex-col gap-2 text-center"
-              div2ClassName="mx-auto grid gap-4 sm:w-[200px]"
-              buttonClassName={cn(buttonVariants({ variant: "outline" }))}
-              imgClassName={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 `}
             />
           ) : (
             <p className="text-center text-xl mt-4"> no wallets available</p>
@@ -285,7 +280,7 @@ export default function SignUpPage() {
                 {errorMessage}
               </div>
               <div className="flex flex-col gap-4">
-                <UserAuthForm />
+                
               </div>
             </div>
           )}

@@ -32,7 +32,7 @@ const menuItem = [
 ];
 
 export function SiteHeader() {
-  const { isConnected } = useWallet();
+  const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function SiteHeader() {
                 )}
                 href="/wallet"
               >
-                Disconnect Wallet
+                Disconnect Wallet {balance}
               </Link>
             ) : (
               <Link
