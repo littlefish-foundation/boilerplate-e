@@ -8,6 +8,7 @@ const CardComponent = () => {
   const { assets, isConnected, decodeHexToAscii } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
   const [walletAssets, setWalletAssets] = useState<Asset[]>([]); // State for storing decoded wallet assets
   const [hoverIndex, setHoverIndex] = useState<number | null>(null); // State for storing the index of the currently hovered asset
+  console.log(assets)
 
   useEffect(() => {
     try {

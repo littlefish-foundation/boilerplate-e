@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
 
+
 const menuItem = [
   {
     id: 1,
@@ -32,7 +33,7 @@ const menuItem = [
 ];
 
 export function SiteHeader() {
-  const { isConnected, balance } = useWallet();
+  const { isConnected, balance, connectedWallet } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
 
   useEffect(() => {
@@ -111,14 +112,15 @@ export function SiteHeader() {
             </>
             {isConnected ? (
               <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/wallet"
-              >
-                Disconnect Wallet {balance}
-              </Link>
+              className={cn(
+                buttonVariants({ variant: "secondary" }),
+                "mr-6 text-sm"
+              )}
+              href="/wallet" // Use `to` instead of `href` for React Router
+            >
+              {connectedWallet?.icon && <img src={connectedWallet.icon} alt="Wallet Icon" className="mr-2" width={28}
+              height={28} />} Disconnect {balance/1000000}
+            </Link>
             ) : (
               <Link
                 className={cn(
