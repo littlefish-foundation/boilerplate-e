@@ -1,9 +1,23 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import prisma from "./app/lib/prisma";
-import { loginUser } from "littlefish-nft-auth-framework/backend";
+import { loginUser, setConfig } from "littlefish-nft-auth-framework/backend";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Adapter } from "next-auth/adapters";
+
+const config = {
+  0: {
+    // preprod
+    apiKey: process.env.PREPROD_API_KEY,
+    networkId: "preprod",
+  },
+  1: {
+    // mainnet
+    apiKey: process.env.MAINNET_API_KEY,
+    networkId: "mainnet",
+  },
+  // Add other networks as needed
+};
 
 declare module "next-auth" {
   /**
@@ -87,15 +101,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           !credentials.assetName ||
           !credentials.amount
         ) {
-
           const user = await prisma.user.findUnique({
             where: {
               walletAddress: walletAddress,
+            },
+            include: {
+              assets: true,
             },
           });
 
           if (!user) {
             throw new Error("No user found");
+          }
+
+          if (user.assets.length !== 0) {
+            throw new Error("Asset details required for this user");
           }
           const sanitizedUser = {
             stakeAddress: user.walletAddress as string,
@@ -108,14 +128,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             key,
             nonce,
           });
-          console.log("isValid", isValid);
           if (isValid.success) {
             return user;
           } else {
             throw new Error("Invalid credentials");
           }
         } else {
-          const asset = { policyID: credentials.policyID as string, assetName: credentials.assetName as string, amount: credentials.amount as number };
+          const asset = {
+            policyID: credentials.policyID as string, assetName: credentials.assetName as string, amount: parseInt(
+              credentials.amount as string,
+              10
+            )
+          };
+          const networkConfig = config[walletNetwork as keyof typeof config];
+          if (!networkConfig || !networkConfig.apiKey) {
+            throw new Error(
+              "Configuration for the provided network is missing or incomplete."
+            );
+          }
+          setConfig(networkConfig.apiKey, networkConfig.networkId);
           const assets = [asset];
 
           const user = await prisma.user.findUnique({
@@ -129,8 +160,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!user) {
             throw new Error("No user found");
           }
-
-          const sanitizedAsset = user.assets.find((matchingAsset) => matchingAsset.policyID === asset.policyID && matchingAsset.assetName === asset.assetName);
+          const assetToSanitize = user.assets.find((matchingAsset) => matchingAsset.policyID === asset.policyID && matchingAsset.assetName === asset.assetName);
+          if (!assetToSanitize) {
+            throw new Error("No asset found for this user");
+          }
+          const sanitizedAsset = {
+            policyID: assetToSanitize.policyID,
+            assetName: assetToSanitize.assetName,
+            amount: assetToSanitize.amount,
+          };
 
           const sanitizedUser = {
             stakeAddress: user.walletAddress as string,
@@ -146,7 +184,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             nonce,
             assets,
           });
-          console.log("isValid", isValid);
           if (isValid.success) {
             return user;
           } else {

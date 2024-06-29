@@ -51,7 +51,6 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
     if (!response.ok) {
       // Read the response as text to see what went wrong
       const errorText = await response.text();
-      console.error("Failed to login with response:", errorText);
       // Return a general error message
       return { error: `Error: ${response.statusText}` };
     }
@@ -70,7 +69,6 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
     // Return success if the login was successful
     return { success: true };
   } catch (error) {
-    console.error("Login action failed:", error); // Log any errors that occur during the request
     // Return a general error message
     return { error: "Login action failed" };
   }
@@ -84,11 +82,12 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     signature,
     key,
     nonce,
-    asset,
+    policyID: asset.policyID,
+    assetName: asset.assetName,
+    amount: asset.amount,
   };
 
   const result = await signIn("credentials",{ ...requestBody, redirectTo: "/assets"});
-  console.log(typeof(result))
   return result;
 }
 
@@ -104,6 +103,5 @@ export async function loginWithCardano(walletAddress: string, walletNetwork: num
   };
 
   const result = await signIn("credentials",{ ...requestBody, redirectTo: "/assets"});
-  console.log(typeof(result))
   return result;
 }

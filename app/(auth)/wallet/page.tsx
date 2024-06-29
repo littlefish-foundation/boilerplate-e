@@ -18,7 +18,7 @@ export default function LoginPage() {
     connectWallet,
     disconnectWallet,
     wallets,
-    connectedWalletId,
+    connectedWallet,
     isClient,
   } = useWallet(); // Destructure wallet connection status and details from useWallet hook
   const [isLoading, setIsLoading] = React.useState<boolean>(false); // State for loading status
@@ -79,7 +79,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="mx-auto grid grid-cols-2 gap-4 sm:w-[350px]">
-            {isConnected ? (
+            {(isConnected && connectedWallet) ? (
               // Display disconnect button if a wallet is connected
               <button
                 type="submit"
@@ -92,14 +92,14 @@ export default function LoginPage() {
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {/* Loader icon if loading */}
                 <div className="group relative flex items-center">
                       <img
-                        src={wallets.find((wallet) => wallet.name === connectedWalletId)?.icon}
-                        alt={connectedWalletId || 'default-alt-text'}
+                        src={wallets.find((wallet) => wallet.name === connectedWallet.name)?.icon}
+                        alt={connectedWallet.name || 'default-alt-text'}
                         className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
-                          wallets.find((wallet) => wallet.name !== connectedWalletId) ? "grayscale" : ""
+                          wallets.find((wallet) => wallet.name !== connectedWallet.name) ? "grayscale" : ""
                         }`} // Corrected condition
                       />
                       <span>
-                      {connectedWalletId}
+                      {connectedWallet.name}
                       </span>
                     </div>
               </button>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                     disabled={isLoading} // Disable button if loading
                     onClick={() => {
                       setIsLoading(true);
-                      connectWallet(wallet.name); // Connect wallet on click
+                      connectWallet(wallet); // Connect wallet on click
                       setIsLoading(false);
                     }}
                   >
@@ -128,7 +128,7 @@ export default function LoginPage() {
                         src={wallet.icon}
                         alt={wallet.name}
                         className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
-                          wallet.name !== connectedWalletId ? "grayscale" : ""
+                          wallet.name !== connectedWallet?.name ? "grayscale" : ""
                         }`} // Corrected condition
                       />
                       <span>

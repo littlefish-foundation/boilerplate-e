@@ -18,6 +18,7 @@ const SessionChecker = () => {
       <div>
         <p>Logged in as {session.user.walletAddress}</p>
         <p>Wallet Network: {session.user.walletNetwork}</p>
+        <p>Verified Policy: {session.user.verifiedPolicy}</p>
       </div>
     );
   }

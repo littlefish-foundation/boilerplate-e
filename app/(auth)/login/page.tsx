@@ -103,7 +103,7 @@ export default function LoginPage() {
             console.log("result", result);
             router.push("/assets"); // Navigate to assets page
           } else {
-            setErrorMessage(result.error || "Login failed"); // Set error message if login fails
+            setErrorMessage(result || "Login failed"); // Set error message if login fails
             setSuccess(false); // Set success status to false
           }
         }
@@ -177,16 +177,22 @@ export default function LoginPage() {
           </div>) : (
             <>
               {
-                decodedAssets.length === 0 ? (<div>No Asset Found</div>) : (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-                  {decodedAssets.map((asset, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCardanoLogin(asset)}
-                      className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
-                      {asset.assetName}
-                    </button>
-                  ))}
+                assets.length === 0 ? (<div>No Asset Found</div>) : (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+                  {decodedAssets.length === 0 ? (
+                    <div>No Decoded Asset Found</div>
+                  ) : (
+                    <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+                      {decodedAssets.map((asset, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleCardanoLogin(assets[index] as Asset)}
+                          className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          {asset.assetName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>)
               }
             </>
