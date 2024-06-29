@@ -38,7 +38,7 @@ export function FormkitCardano(props: SVGProps<SVGSVGElement>) {
 
 
 export default function DashboardPage() {
-  const { balance, assets, isConnected, decodeHexToAscii,connectedWallet   } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
+  const { balance, assets, isConnected, decodeHexToAscii,connectedWallet } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
   const [walletAssets, setWalletAssets] = useState<Asset[]>([]); // State for storing decoded wallet assets
 
   const features = [
@@ -85,7 +85,7 @@ export default function DashboardPage() {
         "Get notified when someone shares a file or mentions you in a comment.",
       href: "/",
       cta: "Learn more",
-      background: <DexHunter wallet={connectedWallet.name}/>,
+      background: <DexHunter wallet={"eternl"}/>,
       className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
     },
   ];
