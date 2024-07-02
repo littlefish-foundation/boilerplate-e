@@ -48,7 +48,6 @@ model Asset {
 model Policy {
   id       String  @id @default(cuid())
   policyID String  @unique
-  role     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
