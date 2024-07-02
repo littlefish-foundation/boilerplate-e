@@ -8,6 +8,7 @@ import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
+import { signOut } from "next-auth/react";
 
 const menuItem = [
   {
@@ -117,15 +118,15 @@ export function SiteHeader() {
                 )}
                 href="/settings">
                 Settings</Link>}
-              <Link
+              <button
                 className={cn(
                   buttonVariants({ variant: "secondary" }),
                   "mr-6 text-sm"
                 )}
-                href="/signup"
+                onClick={() => signOut()}
               >
                 Log Out
-              </Link>
+              </button>
             </>}
             {isConnected ? (
               <Link

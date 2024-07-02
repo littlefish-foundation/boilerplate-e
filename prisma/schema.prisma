@@ -5,52 +5,57 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String?          @unique
-  emailVerified DateTime?
-  password      String?
-  walletAddress String?         @unique
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  password              String?
+  walletAddress         String?   @unique
   walletAddressVerified DateTime?
-  walletNetwork Int?
-  verifiedPolicy String?
-  assets        Asset[]
-  accounts      Account[]
-  sessions      Session[]
- 
+  walletNetwork         Int?
+  verifiedPolicy        String?
+  assets                Asset[]
+  accounts              Account[]
+  sessions              Session[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Asset {
-  id          String  @id @default(cuid())
-  policyID    String
-  assetName   String
-  amount      Int
-  UserId      String
-  user       User    @relation(fields: [UserId], references: [id])
+  id        String @id @default(cuid())
+  policyID  String
+  assetName String
+  amount    Int
+  UserId    String
+  user      User   @relation(fields: [UserId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Policy {
-  id       String  @id @default(cuid())
-  policyID String  @unique
+  id       String @id @default(cuid())
+  policyID String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id String @id @default(cuid())
+  strictPolicy Boolean @default(false)
 }
 
 model Account {
@@ -65,23 +70,23 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
- 
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
   @@id([provider, providerAccountId])
 }
 
 model Session {
-  sessionToken String   @unique
-  userId       String
+  sessionToken  String   @unique
+  userId        String
   walletAddress String
   walletNetwork Int
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  expires       DateTime
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
