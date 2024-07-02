@@ -25,7 +25,7 @@ export default function LoginPage() {
 
           )) : <>
             <button className="block text-gray-700 text-sm font-bold mb-2" onClick={() => disconnectWallet()}>
-              Disconnect Wallet
+              Disconnect
             </button>
             <button className="block text-gray-700 text-sm font-bold mb-2" onClick={() => signMessage(connectedWallet.name, isConnected, nonce, addresses[0])}>
             Signin with {connectedWallet?.name}

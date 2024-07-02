@@ -7,6 +7,7 @@ import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
+import  ModeToggle  from "@/components/ui/mode-toggle";
 
 const menuItem = [
   {
@@ -46,6 +47,13 @@ export function SiteHeader() {
     };
   }, [setHamburgerMenuIsOpen]);
 
+  const formatBalance = (balance: number): string => {
+    const formattedBalance = (balance / 1_000_000).toFixed(2); // Dividing by 1 million and fixing to 2 decimal places
+    return `₳ ${formattedBalance}`;
+  };
+
+  const formattedBalance = formatBalance(balance);
+
   return (
     <>
       <header className="fixed left-0 top-0 z-50 w-full translate-y-[-1rem] animate-fade-in border-b opacity-0 backdrop-blur-[12px] [--animation-delay:600ms]">
@@ -82,7 +90,7 @@ export function SiteHeader() {
             <>
               <Link
                 className={cn(
-                  buttonVariants({ variant: "secondary" }),
+                  buttonVariants({ variant: "outline" }),
                   "mr-6 text-sm"
                 )}
                 href="/login"
@@ -91,28 +99,29 @@ export function SiteHeader() {
               </Link>
               <Link
                 className={cn(
-                  buttonVariants({ variant: "secondary" }),
+                  buttonVariants({ variant: "outline" }),
                   "mr-6 text-sm"
                 )}
                 href="/signup"
               >
                 Sign Up
               </Link>
+              
             </>
             {isConnected ? (
               <Link
                 className={cn(
-                  buttonVariants({ variant: "secondary" }),
+                  buttonVariants({ variant: "outline" }),
                   "mr-6 text-sm"
                 )}
                 href="/wallet"
               >
-                Disconnect Wallet {balance}
+                Disconnect {formattedBalance}
               </Link>
             ) : (
               <Link
                 className={cn(
-                  buttonVariants({ variant: "secondary" }),
+                  buttonVariants({ variant: "outline" }),
                   "mr-6 text-sm"
                 )}
                 href="/wallet"
@@ -120,6 +129,7 @@ export function SiteHeader() {
                 Connect Wallet
               </Link>
             )}
+            <ModeToggle />
           </div>
           <button
             className="ml-6 md:hidden"
