@@ -10,24 +10,14 @@ import { useWallet } from "littlefish-nft-auth-framework/frontend";
 
 const menuItem = [
   {
+    id: 2,
+    label: "Dashboard",
+    href: "/dashboard",
+  },
+  {
     id: 1,
     label: "Framework Demo",
     href: "/assets",
-  },
-  {
-    id: 2,
-    label: "Documents",
-    href: "https://tools.littlefish.foundation/littlefish-research-hub",
-  },
-  {
-    id: 3,
-    label: "IKIGAI Journey",
-    href: "https://www.journey4.life/",
-  },
-  {
-    id: 4,
-    label: "DAO Tool Map",
-    href: "https://map.littlefish.foundation/",
   },
 ];
 

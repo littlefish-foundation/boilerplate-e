@@ -1,10 +1,14 @@
-import { DiscordLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
+import { DiscordLogoIcon, GitHubLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 
 const footerNavs = [
   {
-    label: "Product",
+    label: "About littlefish",
     items: [
+      {
+        href: "https://littlefish.foundation/",
+        name: "Home",
+      },
       {
         href: "https://tools.littlefish.foundation/littlefish-research-hub",
         name: "Littlefish Research",
@@ -42,6 +46,11 @@ const footerSocials = [
     name: "X",
     icon: <TwitterLogoIcon className="h-4 w-4" />,
   },
+  {
+    href: "https://github.com/littlefish-foundation",
+    name: "GitHub",
+    icon: <GitHubLogoIcon className="h-4 w-4" />,
+  },
 ];
 
 export function SiteFooter() {
@@ -56,7 +65,7 @@ export function SiteFooter() {
                 littlefish
               </span>
             </Link>
-            <p className="max-w-xs">Reinventing Remote Work</p>
+            <p className="max-w-xs">Spread Cardano together! #becomealittlefish</p>
           </div>
           <div className="grid grid-cols-1 gap-8 sm:gap-10 sm:grid-cols-3">
             {footerNavs.map((nav) => (
