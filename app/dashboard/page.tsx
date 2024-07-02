@@ -3,16 +3,9 @@ import { BentoCardano } from "@/components/nft-auth/bentoCardano";
 
 export default async function Page() {
   return (
-    <>
+    <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <BentoCardano />
-      <Particles
-        className="absolute inset-0 -z-10"
-        quantity={50}
-        ease={70}
-        size={0.05}
-        staticity={40}
-        color={"#ffffff"}
-      />
-    </>
+      
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { CalendarIcon, FileTextIcon, InputIcon } from "@radix-ui/react-icons";
-import { Share2Icon } from "lucide-react";
+import { BellIcon, GlobeIcon, Share2Icon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,6 +14,8 @@ import {
 import AnimatedBeamMultipleOutput from "@/components/magicui/animated-beam-multiple-outputs";
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import Marquee from "@/components/magicui/marquee";
+import  NFTListMarquee  from "@/components/nft-auth/nft-list-marquee";
+import TokenListMarquee from "@/components/nft-auth/token-list";
 
 const files = [
   {
@@ -117,6 +119,7 @@ const Notification = ({ name, description, icon, color, time }: Item) => {
   );
 };
 
+/*
 const features = [
   {
     Icon: FileTextIcon,
@@ -202,6 +205,73 @@ const features = [
         className="absolute right-0 top-10 origin-top rounded-md border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
       />
     ),
+  },
+  {
+    Icon: BellIcon,
+    name: "Notifications",
+    description:
+      "Get notified when someone shares a file or mentions you in a comment.",
+    href: "/",
+    cta: "Learn more",
+    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
+  },
+];
+
+*/
+
+const features = [
+  {
+    Icon: FileTextIcon,
+    name: "Tokens",
+    description: "Your nativce tokens",
+    href: "/",
+    cta: "Learn more",
+    background: <TokenListMarquee />,
+    className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
+  },
+  {
+    Icon: InputIcon,
+    name: "Wallet",
+    description: "Your wallet at a glance.",
+    href: "/",
+    cta: "Learn more",
+    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-2",
+  },
+  {
+    Icon: GlobeIcon,
+    name: "NFTs",
+    description: "Your NFTs",
+    href: "/",
+    cta: "Learn more",
+    background: <NFTListMarquee />,
+    className: "lg:col-start-1 lg:col-end-2 lg:row-start-2 lg:row-end-4 ",
+  },
+  {
+    Icon: CalendarIcon,
+    name: "Cardano Calendar",
+    description: "Schedule your Cardano payments.",
+    href: "/",
+    cta: "Schedule",
+    background: (
+      <Calendar
+        mode="single"
+        selected={new Date(2022, 4, 11, 0, 0, 0)}
+        className="absolute right-0 top-5 origin-top rounded-md border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
+      />
+    ),
+    className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
+  },
+  {
+    Icon: BellIcon,
+    name: "dexHunter Swaps",
+    description:
+      "Exchange your tokens from your local computer",
+    href: "/",
+    cta: "Learn more",
+    background: <img className="absolute -right-20 -top-20 opacity-60" />,
+    className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",
   },
 ];
 

@@ -1,13 +1,13 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-interface MarketingLayoutProps {
+interface DashboardProps {
   children: React.ReactNode;
 }
 
-export default async function MarketingLayout({
+export default async function Dashboard({
   children,
-}: MarketingLayoutProps) {
+}: DashboardProps) {
   return (
     <>
       {/* <SiteBanner /> */}
