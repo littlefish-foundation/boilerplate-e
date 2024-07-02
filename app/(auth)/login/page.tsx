@@ -101,7 +101,7 @@ export default function LoginPage() {
             setSuccess(true); // Set success status to true
             setErrorMessage(""); // Clear error message
             console.log("result", result);
-            router.push("/assets"); // Navigate to assets page
+            router.push("/"); // Navigate to assets page
           } else {
             setErrorMessage(result || "Login failed"); // Set error message if login fails
             setSuccess(false); // Set success status to false
