@@ -87,7 +87,8 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     amount: asset.amount,
   };
 
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/assets"});
+  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
+  console.log("result", result);
   return result;
 }
 
@@ -102,6 +103,7 @@ export async function loginWithCardano(walletAddress: string, walletNetwork: num
     nonce,
   };
 
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/assets"});
+  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
+  console.log("result", result);
   return result;
 }

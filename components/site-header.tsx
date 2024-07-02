@@ -1,12 +1,14 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlignJustify, XIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
+import { signOut } from "next-auth/react";
 
 const menuItem = [
   {
@@ -24,6 +26,7 @@ const menuItem = [
 export function SiteHeader() {
   const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     console.log(hamburgerMenuIsOpen);
@@ -68,9 +71,8 @@ export function SiteHeader() {
                 className="flex h-full items-center hover:text-electric-violet-500"
               >
                 <Link
-                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${
-                    hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
-                  }`}
+                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
+                    }`}
                   href={item.href}
                 >
                   {item.label}
@@ -79,7 +81,7 @@ export function SiteHeader() {
             ))}
           </div>
           <div className="ml-auto flex h-full items-center">
-            <>
+            {!session?.user ? <>
               <Link
                 className={cn(
                   buttonVariants({ variant: "secondary" }),
@@ -98,7 +100,24 @@ export function SiteHeader() {
               >
                 Sign Up
               </Link>
-            </>
+            </> : <>
+              {session?.user?.verifiedPolicy === "admin" && <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/settings">
+                Settings</Link>}
+              <button
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                onClick={() => signOut()}
+              >
+                Log Out
+              </button>
+            </>}
             {isConnected ? (
               <Link
                 className={cn(
@@ -129,7 +148,7 @@ export function SiteHeader() {
             {hamburgerMenuIsOpen ? <XIcon /> : <AlignJustify />}
           </button>
         </div>
-      </header>
+      </header >
       <AnimatePresence>
         <motion.nav
           initial="initial"
@@ -181,9 +200,8 @@ export function SiteHeader() {
                 className="border-grey-dark pl-6 py-0.5 border-b md:border-none"
               >
                 <Link
-                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${
-                    hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
-                  }`}
+                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
+                    }`}
                   href={item.href}
                 >
                   {item.label}
