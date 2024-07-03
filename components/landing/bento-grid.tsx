@@ -52,7 +52,7 @@ const features = [
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
+        src="/secure_auth.png"
         className="absolute -right-20 -top-20 opacity-60"
       />
     ),
@@ -67,7 +67,7 @@ const features = [
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
+        src="/secure_auth.png"
         className="absolute -right-20 -top-20 opacity-60"
       />
     ),
@@ -82,7 +82,7 @@ const features = [
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
+        src="/secure_auth.png"
         className="absolute -right-20 -top-20 opacity-60"
       />
     ),

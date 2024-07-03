@@ -40,21 +40,25 @@ const MetadataDisplay: React.FC = () => {
   }
 
   return (
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow p-6 md:p-8 lg:p-20 ml-0 md:ml-64"> 
     <div>
       <h2>Metadata Received:</h2>
       <p>Connected wallet: {connectedWallet?.name}</p>
       <p>Total assets: {metadata.length}</p>
       <ul>
-        {metadata.slice(0, 5).map((asset, index) => {
+        {metadata.slice(0, 50).map((asset, index) => {
           const displayName = isHex(asset.asset_name) ? hexToAscii(asset.asset_name) : asset.asset_name;
           return (
             <li key={index}>
-              {displayName} (Hex: {asset.asset_name}) (Policy ID: {asset.policy_id.slice(0, 8)}...)
+              {displayName} (Hex: {asset.asset_name}) (Policy ID: {asset.policy_id.slice(0, 48)}...)
             </li>
           );
         })}
       </ul>
       {metadata.length > 5 && <p>...and {metadata.length - 5} more</p>}
+    </div>
+    </div>
     </div>
   );
 };

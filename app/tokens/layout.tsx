@@ -1,21 +1,26 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { MetadataProvider } from '@/contexts/MetadataContext';
+import WalletMetadataFetcher from '@/components/nft-auth/WalletMetadataFetcher';
 
 
-interface DashboardProps {
+interface TokensProps {
   children: React.ReactNode;
 }
 
-export default async function Dashboard({
+export default async function Tokens({
   children,
-}: DashboardProps) {
+}: TokensProps) {
   return (
     <>
-      {/* <SiteBanner /> */}
+      
+      <MetadataProvider>
+        <WalletMetadataFetcher />
       <SiteHeader />
       
       <main className="mx-auto flex-1 overflow-hidden">{children}</main>
       <SiteFooter />
+      </MetadataProvider>
     </>
   );
 }

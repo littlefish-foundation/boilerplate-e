@@ -15,7 +15,7 @@ export default function Dashboard({
       <MetadataProvider>
         <WalletMetadataFetcher />
         <SiteHeader />
-        <main className="mx-auto flex-1 overflow-hidden">{children}</main>
+        <main className="relativemx-auto flex-1 overflow-hidden">{children}</main>
         <SiteFooter />
       </MetadataProvider>
     </>

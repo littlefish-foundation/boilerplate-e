@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { convertAssetName } from '@/lib/utils';
+import { useSession } from 'next-auth/react'; // Assuming you're using NextAuth
 
 interface AssetMetadata {
   policy_id: string;
@@ -35,12 +36,16 @@ export const MetadataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [metadata, setMetadata] = useState<AssetMetadata[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: session } = useSession();
   
   const lastFetchRef = useRef<{ params: { stakeAddress: string; network: string }; timestamp: number; data: AssetMetadata[] } | null>(null);
 
   const fetchMetadata = useCallback(async (stakeAddress: string, network: string) => {
     console.log('fetchMetadata called with:', { stakeAddress, network });
 
+    
+    
     const now = Date.now();
     const cacheTime = 5 * 60 * 1000; // 5 minutes cache time
 
@@ -70,10 +75,10 @@ export const MetadataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       const data = await response.json();
-      const processedData = data.assets.map((asset: AssetMetadata) => ({
+      const processedData = data.assets?.map((asset: AssetMetadata) => ({
         ...asset,
-        display_name: convertAssetName(asset.asset_name)
-      }));
+        display_name: asset.asset_name ? convertAssetName(asset.asset_name) : 'Unknown Asset'
+      })) || [];
       console.log('Received and processed metadata:', processedData);
       setMetadata(processedData);
       
