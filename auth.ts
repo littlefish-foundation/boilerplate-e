@@ -56,6 +56,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
   callbacks: {
     async jwt({ token, user }) {
+      console.log('JWT Callback - Token:', token);
+      console.log('JWT Callback - User:', user);
       if (user) {
         token.walletAddress = user.walletAddress;
         token.walletNetwork = user.walletNetwork;
@@ -64,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     session: async ({ session, token }) => {
+      console.log('Session Callback - Before:', session);
       session.user.walletAddress = token.walletAddress as string;
       session.user.walletNetwork = token.walletNetwork as number;
       session.user.verifiedPolicy = token.verifiedPolicy as string;

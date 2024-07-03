@@ -14,13 +14,9 @@ export default async function Dashboard({
   return (
     <>
       {/* <SiteBanner /> */}
-      <MetadataProvider>
-      
-      <SiteHeader />
-      
-      <main className="mx-auto flex-1 overflow-hidden">{children}</main>
-      <SiteFooter />
-      </MetadataProvider>
+        <SiteHeader />
+          <main className="mx-auto flex-1 overflow-hidden">{children}</main>
+        <SiteFooter />
     </>
   );
 }

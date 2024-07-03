@@ -8,6 +8,7 @@ import {
 } from "littlefish-nft-auth-framework/frontend";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Function to handle message signing for Cardano wallet
 async function handleSign(
@@ -60,26 +61,30 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(false); // State for success status
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]); // State for decoded assets
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
     }
-  }, [isConnected]);
+  }, [isConnected, assets, decodeHexToAscii]);
+
+  useEffect(() => {
+    console.log("Session status:", status);
+    console.log("Session data:", session);
+  }, [session, status]);
 
   // Function to handle login with Cardano wallet
   async function handleCardanoLogin(asset?: Asset) {
     if (connectedWallet) {
       try {
-        // Sign the message using the wallet
         const signResponse = await handleSign(
           connectedWallet.name,
           isConnected,
           addresses[0]
         );
         if (signResponse) {
-          const [key, signature] = signResponse; // Destructure key and signature from the response
-          // Perform login with the Cardano wallet details
+          const [key, signature] = signResponse;
           let result;
           if (asset) {
             result = await loginWithAsset(
@@ -97,20 +102,20 @@ export default function LoginPage() {
               signature
             );
           }
-          if (result) {
-            setSuccess(true); // Set success status to true
-            setErrorMessage(""); // Clear error message
-            console.log("result", result);
-            router.push("/"); // Navigate to assets page
+          console.log("Login result:", result);
+          if (result.success) {
+            setSuccess(true);
+            setErrorMessage("");
+            router.push("/");
           } else {
-            setErrorMessage(result || "Login failed"); // Set error message if login fails
-            setSuccess(false); // Set success status to false
+            setErrorMessage(result.error || "Login failed");
+            setSuccess(false);
           }
         }
       } catch (error) {
-        console.error("Failed to handle Cardano login:", error); // Log any errors that occur during Cardano login
-        setErrorMessage("Failed to handle Cardano login"); // Set error message for Cardano login failure
-        setSuccess(false); // Set success status to false
+        console.error("Failed to handle Cardano login:", error);
+        setErrorMessage("Failed to handle Cardano login");
+        setSuccess(false);
       }
     }
   }
@@ -121,10 +126,12 @@ export default function LoginPage() {
       // Perform login with email and password
       const result = await loginWithMail(email, password);
       if (result.success) {
+        console.log('Login successful, result:', result);
         setSuccess(true); // Set success status to true
         setErrorMessage(""); // Clear error message
-        router.push("/assets"); // Navigate to assets page
+        router.push("/dashboard"); // Navigate to assets page
       } else {
+        console.error('Login failed, result:', result);
         setErrorMessage(result.error || "Login failed"); // Set error message if login fails
         setSuccess(false); // Set success status to false
       }
@@ -212,5 +219,6 @@ export default function LoginPage() {
         </div>
       )}
     </div>
+    
   );
 }

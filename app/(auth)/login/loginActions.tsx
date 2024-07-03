@@ -87,9 +87,25 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     amount: asset.amount,
   };
 
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
-  console.log("result", result);
-  return result;
+  try {
+    const result = await signIn("credentials", { ...requestBody, redirect: false });
+    console.log("signIn result:", result);
+    
+    if (result?.error) {
+      console.error("Login error:", result.error);
+      return { error: result.error };
+    }
+    
+    if (result?.ok) {
+      console.log("Login successful, session should be created");
+      return { success: true };
+    }
+    
+    return { error: "Unexpected result from signIn" };
+  } catch (error) {
+    console.error("Error during loginWithAsset:", error);
+    return { error: "Login action failed" };
+  }
 }
 
 // Function to handle login with Cardano wallet details

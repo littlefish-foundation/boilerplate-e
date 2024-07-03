@@ -4,12 +4,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlignJustify, XIcon, LogOut } from "lucide-react";
+import { AlignJustify, XIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { signOut } from "next-auth/react";
-import  ModeToggle  from "@/components/ui/mode-toggle";
+import ModeToggle from "@/components/ui/mode-toggle";
 import { useTheme } from "next-themes";
 
 const menuItem = [
@@ -29,6 +29,12 @@ export function SiteHeader() {
   const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
   const { data: session, status } = useSession();
+
+  // Debugging logs
+  useEffect(() => {
+    console.log("Session status:", status);
+    console.log("Session data:", session);
+  }, [session, status]);
 
   useEffect(() => {
     console.log(hamburgerMenuIsOpen);
@@ -52,7 +58,7 @@ export function SiteHeader() {
   }, [setHamburgerMenuIsOpen]);
 
   const formatBalance = (balance: number): string => {
-    const formattedBalance = (balance / 1_000_000).toFixed(2); // Dividing by 1 million and fixing to 2 decimal places
+    const formattedBalance = (balance / 1_000_000).toFixed(2);
     return `₳ ${formattedBalance}`;
   };
 
@@ -65,7 +71,6 @@ export function SiteHeader() {
         <div className="container flex h-[3.5rem] items-center justify-between">
           <Link className="text-md flex items-center" href="/">
             <img src={theme === 'dark' ? "logo1.png" : "logo1d.png"} alt="littlefishs" className="w-42 h-10" />
-            
           </Link>
           <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
             {menuItem.map((item) => (
@@ -92,43 +97,60 @@ export function SiteHeader() {
             ))}
           </div>
           <div className="ml-auto flex h-full items-center">
-            {!session?.user ? <>
-              <Link
-                className={cn(
+            {status === "loading" ? (
+              <div>Loading...</div>
+            ) : status === "authenticated" && session?.user ? (
+              <>
+                <div className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "mr-6 text-sm"
+                  "mr-6 text-sm flex items-center"
+                )}>
+                  <User size={16} className="mr-2" />
+                  <span>{session.user.name || 'User'}</span>
+                </div>
+                {session.user.verifiedPolicy === "admin" && (
+                  <Link
+                    className={cn(
+                      buttonVariants({ variant: "secondary" }),
+                      "mr-6 text-sm"
+                    )}
+                    href="/settings"
+                  >
+                    Settings
+                  </Link>
                 )}
-                href="/login"
-              >
-                Login
-              </Link>
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "mr-6 text-sm"
-                )}
-                href="/signup"
-              >
-                Sign Up
-              </Link>
-            </> : <>
-              {session?.user?.verifiedPolicy === "admin" && <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/settings">
-                Settings</Link>}
-              <button
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                onClick={() => signOut()}
-              >
-                Log Out
-              </button>
-            </>}
+                <button
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "mr-6 text-sm"
+                  )}
+                  onClick={() => signOut()}
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "mr-6 text-sm"
+                  )}
+                  href="/login"
+                >
+                  Login
+                </Link>
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "mr-6 text-sm"
+                  )}
+                  href="/signup"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
             {isConnected ? (
               <Link
                 className={cn(
@@ -161,7 +183,7 @@ export function SiteHeader() {
             {hamburgerMenuIsOpen ? <XIcon /> : <AlignJustify />}
           </button>
         </div>
-      </header >
+      </header>
       <AnimatePresence>
         <motion.nav
           initial="initial"

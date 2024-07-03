@@ -69,6 +69,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip"
 import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
 import React, { useState, useEffect } from "react";
+import { useMetadata } from '@/contexts/MetadataContext';
 
 
 
@@ -113,8 +114,9 @@ function formatLargeNumber(num: number): string {
 
 export default function TokenList() {
   const { assets, isConnected, decodeHexToAscii, addresses, networkId } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
+  const { metadata } = useMetadata();
   const [walletAssets, setWalletAssets] = useState<Asset[]>([]); // State for storing decoded wallet assets
-  const StakeAddress = convertHexToBech32(addresses[0],1);
+  const StakeAddress = addresses && addresses.length > 0 ? convertHexToBech32(addresses[0], 1) : '';
 
   const BlockForstManinNet = process.env.MAINNET_API_KEY;
   const BlockForstPreProd = process.env.PREPROD_API_KEY;
@@ -122,25 +124,50 @@ export default function TokenList() {
  
   
   useEffect(() => {
-    try {
-      if (assets && Array.isArray(assets)) {
-        // Decode the assets from hex to ASCII if assets array is available
-        const decodedAssets = decodeHexToAscii(assets);
-        const filteredAndMergedTokens = filterAndMergeTokens(decodedAssets);
-        setWalletAssets(filteredAndMergedTokens);
-      }
-    } catch (error) {
-      console.error("Failed to decode assets:", error); // Log any errors that occur during decoding
+    if (assets && Array.isArray(assets)) {
+      const decodedAssets = decodeHexToAscii(assets);
+      const filteredAndMergedTokens = filterAndMergeTokens(decodedAssets);
+      setWalletAssets(filteredAndMergedTokens);
     }
-  }, [assets]); // Effect runs whenever the assets array changes
+  }, [assets, decodeHexToAscii]);
 
+  const getAssetImage = (asset) => {
+    console.log('Asset:', asset);
+    console.log('All Metadata:', metadata);
   
-  console.log(walletAssets);
+    if (metadata) {
+      const metadataItem = metadata.find(item => 
+        item.policy_id === asset.policyID && item.display_name === asset.assetName
+      );
   
+      console.log('Metadata Item:', metadataItem);
+      
+      if (metadataItem?.onchain_metadata?.image) {
+        let imageUrl = metadataItem.onchain_metadata.image;
+        if (typeof imageUrl === 'string') {
+          if (imageUrl.startsWith('ipfs://')) {
+            imageUrl = `https://ipfs.io/ipfs/${imageUrl.slice(7)}`;
+          }
+          console.log('Image URL:', imageUrl);
+          return imageUrl;
+        }
+      }
+  
+      // Check for logo in metadata
+      if (metadataItem?.metadata?.logo) {
+        console.log('Logo found in metadata');
+        return `data:image/png;base64,${metadataItem.metadata.logo}`;
+      }
+    }
+    
+    console.log('No image found, using default');
+    return '/findthefish.png'; // Default image
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-grow p-6 md:p-8 lg:p-10 ml-0 md:ml-64"> {/* Adjusted padding and margin */}
-        <main className="max-w-6xl mx-auto"> {/* Added max-width and centering */}
+      <div className="flex-grow p-6 md:p-8 lg:p-10 ml-0 md:ml-64">
+        <main className="max-w-6xl mx-auto">
           {isConnected ? (
             <Card>
               <CardHeader>
@@ -164,14 +191,16 @@ export default function TokenList() {
                     {walletAssets.map((asset, index) => (
                       <TableRow key={index}>
                         <TableCell className="hidden sm:table-cell">
-                          <Image
-                            alt={asset.assetName || 'Asset'}
-                            className="aspect-square rounded-md object-cover"
-                            height="64"
-                            src= '/findthefish.png'
-                            width="64"
-                          />
-                        </TableCell>
+  {getAssetImage(asset) && (
+    <img
+      alt={asset.assetName || 'Asset'}
+      className="aspect-square rounded-md object-cover"
+      height="64"
+      src={getAssetImage(asset)}
+      width="64"
+    />
+  )}
+</TableCell>
                         <TableCell className="font-medium">{asset.assetName || 'Unknown'}</TableCell>
                         <TableCell>
                           <Badge variant="outline">
