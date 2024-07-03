@@ -4,11 +4,13 @@ import { buttonVariants } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlignJustify, XIcon } from "lucide-react";
+import { AlignJustify, XIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { signOut } from "next-auth/react";
+import  ModeToggle  from "@/components/ui/mode-toggle";
+import { useTheme } from "next-themes";
 
 const menuItem = [
   {
@@ -55,13 +57,15 @@ export function SiteHeader() {
   };
 
   const formattedBalance = formatBalance(balance);
+  const { theme } = useTheme();
 
   return (
     <>
       <header className="fixed left-0 top-0 z-50 w-full translate-y-[-1rem] animate-fade-in border-b opacity-0 backdrop-blur-[12px] [--animation-delay:600ms]">
         <div className="container flex h-[3.5rem] items-center justify-between">
           <Link className="text-md flex items-center" href="/">
-            <img src="logo1.png" alt="Logo" className="w-42 h-10" />
+            <img src={theme === 'dark' ? "logo1.png" : "logo1d.png"} alt="littlefishs" className="w-42 h-10" />
+            
           </Link>
           <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
             {menuItem.map((item) => (
@@ -107,7 +111,24 @@ export function SiteHeader() {
               >
                 Sign Up
               </Link>
-            </>
+            </> : <>
+              {session?.user?.verifiedPolicy === "admin" && <Link
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                href="/settings">
+                Settings</Link>}
+              <button
+                className={cn(
+                  buttonVariants({ variant: "secondary" }),
+                  "mr-6 text-sm"
+                )}
+                onClick={() => signOut()}
+              >
+                Log Out
+              </button>
+            </>}
             {isConnected ? (
               <Link
                 className={cn(
@@ -116,7 +137,8 @@ export function SiteHeader() {
                 )}
                 href="/wallet"
               >
-                Disconnect {formattedBalance}
+                 <span className="mr-2">{formattedBalance}</span>
+                <LogOut size={16} />
               </Link>
             ) : (
               <Link

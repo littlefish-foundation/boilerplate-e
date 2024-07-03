@@ -15,7 +15,7 @@ import AnimatedBeamMultipleOutput from "@/components/magicui/animated-beam-multi
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import Marquee from "@/components/magicui/marquee";
 import  NFTListMarquee  from "@/components/nft-auth/nft-list-marquee";
-import TokenListMarquee from "@/components/nft-auth/token-list";
+import TokenList from "@/components/nft-auth/token-list";
 
 const files = [
   {
@@ -227,7 +227,7 @@ const features = [
     description: "Your nativce tokens",
     href: "/",
     cta: "Learn more",
-    background: <TokenListMarquee />,
+    background: <TokenList />,
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
   },
   {
