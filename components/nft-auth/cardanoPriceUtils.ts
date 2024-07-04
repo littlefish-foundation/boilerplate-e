@@ -62,19 +62,32 @@ export interface MuesliSwapTokenInfo {
   };
 }
 
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+interface CachedData {
+  data: MuesliSwapTokenInfo[];
+  timestamp: number;
+}
+
 // Function to fetch Cardano token prices from MuesliSwap using our proxy
 export async function fetchCardanoTokenPrices(tokens: { policyId: string, assetName: string }[]): Promise<PriceData> {
   const prices: PriceData = {};
 
   try {
-    // Use our proxy API route instead of directly calling MuesliSwap API
-    const response = await fetch('/api/nft-auth/muesliswap-proxy');
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const cachedData = localStorage.getItem('muesliSwapData');
+    let data: MuesliSwapTokenInfo[];
 
-    const data: MuesliSwapTokenInfo[] = await response.json();
+    if (cachedData) {
+      const { data: cachedPrices, timestamp } = JSON.parse(cachedData) as CachedData;
+      const now = Date.now();
+      if (now - timestamp < CACHE_DURATION) {
+        data = cachedPrices;
+      } else {
+        data = await fetchFreshData();
+      }
+    } else {
+      data = await fetchFreshData();
+    }
 
     // Process the list and extract prices for the requested tokens
     tokens.forEach(token => {
@@ -86,7 +99,7 @@ export async function fetchCardanoTokenPrices(tokens: { policyId: string, assetN
 
       if (tokenInfo) {
         prices[quoteAddress] = tokenInfo.price.price;
-        console.log('Fetched price for', quoteAddress, ':', tokenInfo.price.price);
+        // console.log('Fetched price for', quoteAddress, ':', tokenInfo.price.price);
       } else {
         console.log('Price not found for', quoteAddress);
       }
@@ -99,6 +112,22 @@ export async function fetchCardanoTokenPrices(tokens: { policyId: string, assetN
   }
 }
 
+async function fetchFreshData(): Promise<MuesliSwapTokenInfo[]> {
+  const response = await fetch('/api/nft-auth/muesliswap-proxy');
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data: MuesliSwapTokenInfo[] = await response.json();
+  
+  // Cache the fresh data
+  localStorage.setItem('muesliSwapData', JSON.stringify({
+    data,
+    timestamp: Date.now()
+  }));
+
+  return data;
+}
+
 // Hook to fetch and cache MuesliSwap data
 export function useMuesliSwapData() {
   const [muesliSwapData, setMuesliSwapData] = useState<MuesliSwapTokenInfo[] | null>(null);
@@ -108,11 +137,21 @@ export function useMuesliSwapData() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/nft-auth/muesliswap-proxy');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const cachedData = localStorage.getItem('muesliSwapData');
+        let data: MuesliSwapTokenInfo[];
+
+        if (cachedData) {
+          const { data: cachedPrices, timestamp } = JSON.parse(cachedData) as CachedData;
+          const now = Date.now();
+          if (now - timestamp < CACHE_DURATION) {
+            data = cachedPrices;
+          } else {
+            data = await fetchFreshData();
+          }
+        } else {
+          data = await fetchFreshData();
         }
-        const data: MuesliSwapTokenInfo[] = await response.json();
+
         setMuesliSwapData(data);
         setIsLoading(false);
       } catch (err) {
