@@ -1,29 +1,21 @@
-
+// contexts/MetadataContext.tsx
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { convertAssetName } from '@/lib/utils';
-import { useSession } from 'next-auth/react'; // Assuming you're using NextAuth
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { fetchCardanoTokenPrices, MuesliSwapTokenInfo } from '@/components/nft-auth/cardanoPriceUtils';
 
-interface AssetMetadata {
-  policy_id: string;
-  asset_name: string;
-  fingerprint: string;
-  quantity: string;
-  onchain_metadata?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-  url?: string;
-}
-
+// Define the shape of the context
 interface MetadataContextType {
-  metadata: AssetMetadata[] | null;
+  metadata: MuesliSwapTokenInfo[] | null;
   loading: boolean;
   error: string | null;
-  fetchMetadata: (stakeAddress: string, network: string) => Promise<void>;
+  fetchMetadata: () => Promise<void>;
 }
 
+// Create the context
 const MetadataContext = createContext<MetadataContextType | undefined>(undefined);
 
+// Custom hook to use the metadata context
 export const useMetadata = () => {
   const context = useContext(MetadataContext);
   if (context === undefined) {
@@ -32,131 +24,74 @@ export const useMetadata = () => {
   return context;
 };
 
+// MetadataProvider component
 export const MetadataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [metadata, setMetadata] = useState<AssetMetadata[] | null>(null);
+  const [metadata, setMetadata] = useState<MuesliSwapTokenInfo[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
-  const { data: session } = useSession();
-  
-  const lastFetchRef = useRef<{ params: { stakeAddress: string; network: string }; timestamp: number; data: AssetMetadata[] } | null>(null);
+  const updatePrices = useCallback(async () => {
+    if (metadata) {
+      try {
+        const tokens = metadata.map(token => ({
+          policyId: token.info.address.policyId,
+          assetName: token.info.address.name
+        }));
+        const prices = await fetchCardanoTokenPrices(tokens);
 
-  const fetchMetadata = useCallback(async (stakeAddress: string, network: string) => {
-    console.log('fetchMetadata called with:', { stakeAddress, network });
-
-    
-    
-    const now = Date.now();
-    const cacheTime = 5 * 60 * 1000; // 5 minutes cache time
-
-    if (lastFetchRef.current &&
-        lastFetchRef.current.params.stakeAddress === stakeAddress &&
-        lastFetchRef.current.params.network === network &&
-        now - lastFetchRef.current.timestamp < cacheTime) {
-      console.log('Using cached metadata');
-      setMetadata(lastFetchRef.current.data);
-      return;
+        setMetadata(prevMetadata => 
+          prevMetadata?.map(token => ({
+            ...token,
+            price: {
+              ...token.price,
+              price: prices[`${token.info.address.policyId}${token.info.address.name}`] || token.price.price
+            }
+          })) || null
+        );
+      } catch (err) {
+        console.error('Error updating prices:', err);
+      }
     }
+  }, [metadata]);
 
+  // Function to fetch metadata and start price updates
+  const fetchMetadata = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching metadata from API');
-      const response = await fetch('/api/nft-auth/fetchMetadata', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ stakeAddress, network }),
-      });
+      const response = await fetch('/api/nft-auth/fetchMuesliSwapList');
 
       if (!response.ok) {
         throw new Error('Failed to fetch asset metadata');
       }
 
-      const data = await response.json();
-      const processedData = data.assets?.map((asset: AssetMetadata) => ({
-        ...asset,
-        display_name: asset.asset_name ? convertAssetName(asset.asset_name) : 'Unknown Asset'
-      })) || [];
-      console.log('Received and processed metadata:', processedData);
-      setMetadata(processedData);
-      
-      lastFetchRef.current = {
-        params: { stakeAddress, network },
-        timestamp: now,
-        data: processedData
-      };
-    } catch (err) {
-      console.error('Error fetching asset metadata:', err);
-      setError('Failed to fetch asset data');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const data: MuesliSwapTokenInfo[] = await response.json();
+      setMetadata(data);
 
-  console.log('MetadataProvider rendered. Current state:', { metadata, loading, error });
+      // Fetch initial prices
+      await updatePrices();
 
-  return (
-    <MetadataContext.Provider value={{ metadata, loading, error, fetchMetadata }}>
-      {children}
-    </MetadataContext.Provider>
-  );
-};
-
-/*
-export const MetadataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [metadata, setMetadata] = useState<AssetMetadata[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Use a ref to store the last fetch params and timestamp
-  const lastFetchRef = useRef<{ params: { stakeAddress: string; network: string }; timestamp: number; data: AssetMetadata[] } | null>(null);
-
-  const fetchMetadata = useCallback(async (stakeAddress: string, network: string) => {
-    const now = Date.now();
-    const cacheTime = 5 * 60 * 1000; // 5 minutes cache time
-
-    // Check if we have cached data and it's still valid
-    if (lastFetchRef.current &&
-        lastFetchRef.current.params.stakeAddress === stakeAddress &&
-        lastFetchRef.current.params.network === network &&
-        now - lastFetchRef.current.timestamp < cacheTime) {
-      // Use cached data
-      setMetadata(lastFetchRef.current.data);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/nft-auth/fetchMetadata', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ stakeAddress, network }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch asset metadata');
+      // Start the interval for price updates
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
-
-      const data = await response.json();
-      setMetadata(data.assets);
-      
-      // Update the cache
-      lastFetchRef.current = {
-        params: { stakeAddress, network },
-        timestamp: now,
-        data: data.assets
-      };
+      intervalRef.current = window.setInterval(updatePrices, 15000);
     } catch (err) {
-      console.error('Error fetching asset metadata:', err);
+      console.error('Error fetching metadata:', err);
       setError('Failed to fetch asset data');
     } finally {
       setLoading(false);
     }
+  }, [updatePrices]);
+
+  // Cleanup effect to clear the interval when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -165,5 +100,5 @@ export const MetadataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </MetadataContext.Provider>
   );
 };
-*/
 
+export default MetadataProvider;

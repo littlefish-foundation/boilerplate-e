@@ -1,31 +1,13 @@
 "use client";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image"
 import Link from "next/link"
 import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
   MoreHorizontal,
-  Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
-  Search,
-  Settings,
-  ShoppingCart,
-  Users2,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -54,27 +36,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { TooltipProvider } from "@radix-ui/react-tooltip"
+
+
 import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
-import React, { useState, useEffect } from "react";
 import { useMetadata } from '@/contexts/MetadataContext';
 
-
-
-
-
+// Cache duration in milliseconds (30 seconds)
+const CACHE_DURATION = 30000;
 
 function filterAndMergeTokens(assets: Asset[]): Asset[] {
   // Step 1: Filter out NFTs (assuming NFTs have an amount of 1)
@@ -84,7 +53,7 @@ function filterAndMergeTokens(assets: Asset[]): Asset[] {
   const tokenMap = new Map<string, Asset>();
 
   tokens.forEach(token => {
-    const key = `${token.policyId}-${token.assetName}`;
+    const key = `${token.policyID}-${token.assetName}`;
     if (tokenMap.has(key)) {
       // If the token already exists, add the amounts
       const existingToken = tokenMap.get(key)!;
@@ -111,75 +80,124 @@ function formatLargeNumber(num: number): string {
   }
 }
 
-
 export default function TokenList() {
-  const { assets, isConnected, decodeHexToAscii, addresses, networkId } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
+  const { assets, isConnected, decodeHexToAscii, addresses } = useWallet();
   const { metadata } = useMetadata();
-  const [walletAssets, setWalletAssets] = useState<Asset[]>([]); // State for storing decoded wallet assets
+  const [walletAssets, setWalletAssets] = useState<Asset[]>([]);
+  const [muesliSwapData, setMuesliSwapData] = useState<any>(null);
+  const lastFetchTimeRef = useRef<number>(0);
+  const cachedAssetsRef = useRef<Asset[]>([]);
+  const cachedMuesliSwapDataRef = useRef<any>(null);
   const StakeAddress = addresses && addresses.length > 0 ? convertHexToBech32(addresses[0], 1) : '';
 
-  const BlockForstManinNet = process.env.MAINNET_API_KEY;
-  const BlockForstPreProd = process.env.PREPROD_API_KEY;
-
- 
-  
   useEffect(() => {
-    if (assets && Array.isArray(assets)) {
-      const decodedAssets = decodeHexToAscii(assets);
-      const filteredAndMergedTokens = filterAndMergeTokens(decodedAssets);
-      setWalletAssets(filteredAndMergedTokens);
+    const currentTime = Date.now();
+    
+    if (assets && Array.isArray(assets) && isConnected) {
+      // Check if cache is valid
+      if (currentTime - lastFetchTimeRef.current < CACHE_DURATION) {
+        console.log('Using cached wallet assets');
+        setWalletAssets(cachedAssetsRef.current);
+      } else {
+        console.log('Fetching fresh wallet assets');
+        const decodedAssets = decodeHexToAscii(assets);
+        const filteredAndMergedTokens = filterAndMergeTokens(decodedAssets);
+        setWalletAssets(filteredAndMergedTokens);
+        
+        // Update cache
+        cachedAssetsRef.current = filteredAndMergedTokens;
+        lastFetchTimeRef.current = currentTime;
+      }
     }
-  }, [assets, decodeHexToAscii]);
+  }, [assets, isConnected, decodeHexToAscii]);
 
-  const getAssetImage = (asset) => {
-    console.log('Asset:', asset);
-    console.log('All Metadata:', metadata);
-  
+  const fetchMuesliSwapList = async () => {
+    const currentTime = Date.now();
+
+    if (cachedMuesliSwapDataRef.current && currentTime - lastFetchTimeRef.current < CACHE_DURATION) {
+      console.log('Using cached MuesliSwap data');
+      setMuesliSwapData(cachedMuesliSwapDataRef.current);
+      return;
+    }
+
+    const fetchWithFallback = async (url: string, useCorsAnywhere: boolean = false) => {
+      const fetchUrl = useCorsAnywhere ? `https://cors-anywhere.herokuapp.com/${url}` : url;
+      const response = await fetch(fetchUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    };
+
+    try {
+      console.log('Fetching fresh MuesliSwap data');
+      let data;
+
+      try {
+        // First, try fetching from our API route
+        data = await fetchWithFallback('/api/muesliswap-proxy');
+      } catch (apiError) {
+        console.error('API route fetch failed, trying direct with CORS-Anywhere:', apiError);
+        // If API route fails, try direct fetch with CORS-Anywhere
+        data = await fetchWithFallback('https://api.muesliswap.com/list', true);
+      }
+
+      setMuesliSwapData(data);
+      cachedMuesliSwapDataRef.current = data;
+      lastFetchTimeRef.current = currentTime;
+    } catch (error) {
+      console.error('Error fetching MuesliSwap list:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isConnected) {
+      fetchMuesliSwapList();
+    }
+  }, [isConnected]);
+
+  const getAssetImage = (asset: Asset) => {
     if (metadata) {
       const metadataItem = metadata.find(item => 
-        item.policy_id === asset.policyID && item.display_name === asset.assetName
+        item.info.address.policyId === asset.policyID && item.info.address.name === asset.assetName
       );
   
-      console.log('Metadata Item:', metadataItem);
+      // console.log('Metadata Item:', metadataItem);
       
-      if (metadataItem?.onchain_metadata?.image) {
-        let imageUrl = metadataItem.onchain_metadata.image;
+      if (metadataItem?.info?.image) {
+        let imageUrl = metadataItem.info.image;
         if (typeof imageUrl === 'string') {
           if (imageUrl.startsWith('ipfs://')) {
             imageUrl = `https://ipfs.io/ipfs/${imageUrl.slice(7)}`;
           }
-          console.log('Image URL:', imageUrl);
+          // console.log('Image URL:', imageUrl);
           return imageUrl;
         }
       }
-  
-      // Check for logo in metadata
-      if (metadataItem?.metadata?.logo) {
-        console.log('Logo found in metadata');
-        return `data:image/png;base64,${metadataItem.metadata.logo}`;
-      }
     }
     
-    console.log('No image found, using default');
+    // console.log('No image found, using default');
     return '/findthefish.png'; // Default image
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-grow p-6 md:p-8 lg:p-10 ml-0 md:ml-64">
+      <div className="">
         <main className="max-w-6xl mx-auto">
           {isConnected ? (
             <Card>
               <CardHeader>
-                <CardTitle>Wallet Assets</CardTitle>
+                <CardTitle>Tokens</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="hidden w-[100px] sm:table-cell">Image</TableHead>
-                      <TableHead>Asset Name</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead className="hidden w-[100px] sm:table-cell">Sym</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>PRICE (₳)</TableHead>
                       <TableHead className="hidden md:table-cell">Amount</TableHead>
                       <TableHead className="hidden lg:table-cell">Policy ID</TableHead>
                       <TableHead>
@@ -191,16 +209,16 @@ export default function TokenList() {
                     {walletAssets.map((asset, index) => (
                       <TableRow key={index}>
                         <TableCell className="hidden sm:table-cell">
-  {getAssetImage(asset) && (
-    <img
-      alt={asset.assetName || 'Asset'}
-      className="aspect-square rounded-md object-cover"
-      height="64"
-      src={getAssetImage(asset)}
-      width="64"
-    />
-  )}
-</TableCell>
+                          {getAssetImage(asset) && (
+                            <img
+                              alt={asset.assetName || 'Asset'}
+                              className="aspect-square rounded-md object-cover"
+                              height="64"
+                              src={getAssetImage(asset)}
+                              width="64"
+                            />
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{asset.assetName || 'Unknown'}</TableCell>
                         <TableCell>
                           <Badge variant="outline">
@@ -213,9 +231,9 @@ export default function TokenList() {
                           </span>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
-                          <span className="text-xs text-gray-500" title={asset.policyId || ''}>
-                            {(asset.policyId || '').slice(0, 8)}...
-                            {(asset.policyId || '').slice(-8)}
+                          <span className="text-xs text-gray-500" title={asset.policyID || ''}>
+                            {(asset.policyID || '').slice(0, 8)}...
+                            {(asset.policyID || '').slice(-8)}
                           </span>
                         </TableCell>
                         <TableCell>

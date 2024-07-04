@@ -226,7 +226,7 @@ const features = [
     name: "Tokens",
     description: "Your nativce tokens",
     href: "/",
-    cta: "Learn more",
+    cta: "All tokens -->",
     background: <TokenList />,
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
   },
