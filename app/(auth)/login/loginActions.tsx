@@ -19,59 +19,14 @@ export async function generateNonce(): Promise<string | void> {
 
 // Function to handle login with email and password
 export async function loginWithMail(email: string, password: string): Promise<{ success?: boolean; error?: string }> {
-  try {
-    // Validate the provided email format
-    const validEmail = validateEmail(email);
-    if (!validEmail) {
-      // Return an error if the email format is invalid
-      return { error: "Invalid Email format" };
-    }
+  const requestBody = {
+    email,
+    password
+  };
 
-    // Validate the provided password strength
-    const validPassword = validatePassword(password);
-    if (!validPassword) {
-      // Return an error if the password is weak
-      return { error: "Weak Password" };
-    }
-
-    // Hash the provided password
-    // Create a JSON request body with the email and hashed password
-    const requestBody = JSON.stringify({ email, password });
-
-    // Send a POST request to the login API with the request body
-    const response = await fetch(`${process.env.ROOT_URL}/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: requestBody,
-    });
-
-    // Check if the response is not OK (i.e., an error occurred)
-    if (!response.ok) {
-      // Read the response as text to see what went wrong
-      const errorText = await response.text();
-      // Return a general error message
-      return { error: `Error: ${response.statusText}` };
-    }
-
-    // Parse the JSON response
-    const json = await response.json();
-    // Set an authorization cookie with the token from the response
-    cookies().set("Authorization", json.token, {
-      secure: true, // Ensure the cookie is only sent over HTTPS
-      httpOnly: true, // Ensure the cookie is not accessible via JavaScript
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // Set the cookie to expire in 7 days
-      path: "/", // Set the cookie path to the root
-      sameSite: "strict", // Ensure the cookie is sent only with same-site requests
-    });
-
-    // Return success if the login was successful
-    return { success: true };
-  } catch (error) {
-    // Return a general error message
-    return { error: "Login action failed" };
-  }
+  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
+  console.log("result", result);
+  return result;
 }
 
 export async function loginWithAsset(walletAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset): Promise<{ success?: boolean; error?: string }> {

@@ -74,6 +74,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "wallet",
       credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
         walletAddress: { label: "Wallet Address", type: "text" },
         walletNetwork: { label: "Wallet Network", type: "number" },
         signature: { label: "Signature", type: "text" },
@@ -86,6 +88,43 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         if (!credentials) {
           throw new Error("No credentials provided");
+        }
+        if (credentials.email && credentials.password) {
+          const email = credentials.email as string;
+          const password = credentials.password as string;
+          
+          const user = await prisma.user.findUnique({
+            where: {
+              email: email,
+            },
+            include: {
+              assets: true,
+            },
+          });
+
+          if (!user) {
+            throw new Error("No user found");
+          }
+
+          if (user.assets.length !== 0) {
+            throw new Error("Asset details required for this user");
+          }
+
+          const sanitizedUser = {
+            email: user.email as string,
+            password: user.password as string,
+          };
+          
+          const isValid = await loginUser(sanitizedUser, {
+            email,
+            password,
+          });
+
+          if (isValid.success) {
+            return user;
+          } else {
+            throw new Error("Invalid credentials");
+          }
         }
 
         const walletAddress = credentials.walletAddress as string;

@@ -16,7 +16,7 @@ const SessionChecker = () => {
   if (session) {
     return (
       <div>
-        <p>Logged in as {session.user.walletAddress}</p>
+        <p>Logged in as {session.user.walletAddress ? session.user.walletAddress : session.user.email}</p>
         <p>Wallet Network: {session.user.walletNetwork}</p>
         <p>Verified Policy: {session.user.verifiedPolicy}</p>
       </div>
