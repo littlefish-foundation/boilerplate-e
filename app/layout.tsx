@@ -1,9 +1,8 @@
-// Remove the "use client" directive from here
-
+// /app/layout.tsx
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
 import SessionWrapper from "@/components/SessionWrapper";
-import ClientProviders from "./ClientProviders"; // We'll create this new component
+import ClientProviders from "./ClientProviders";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -16,13 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionWrapper>
-      <html lang="en">
-        <body className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}>
+    <html lang="en">
+      <body className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}>
+        <SessionWrapper>
           <ClientProviders>{children}</ClientProviders>
-        </body>
-      </html>
-    </SessionWrapper>
+        </SessionWrapper>
+      </body>
+    </html>
   );
 }
 
