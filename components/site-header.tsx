@@ -4,32 +4,32 @@ import { buttonVariants } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlignJustify, XIcon } from "lucide-react";
+import { AlignJustify, XIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { signOut } from "next-auth/react";
+import ModeToggle from "@/components/ui/mode-toggle";
+import { useTheme } from "next-themes";
+import  LoginComponent  from "@/components/nft-auth/login";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const menuItem = [
+  {
+    id: 2,
+    label: "Dashboard",
+    href: "/dashboard",
+  },
   {
     id: 1,
     label: "Framework Demo",
     href: "/assets",
-  },
-  {
-    id: 2,
-    label: "Documents",
-    href: "https://tools.littlefish.foundation/littlefish-research-hub",
-  },
-  {
-    id: 3,
-    label: "IKIGAI Journey",
-    href: "https://www.journey4.life/",
-  },
-  {
-    id: 4,
-    label: "DAO Tool Map",
-    href: "https://map.littlefish.foundation/",
   },
 ];
 
@@ -37,6 +37,14 @@ export function SiteHeader() {
   const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
   const { data: session, status } = useSession();
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const { theme } = useTheme();
+
+  // Debugging logs
+  useEffect(() => {
+    console.log("Session status:", status);
+    console.log("Session data:", session);
+  }, [session, status]);
 
   useEffect(() => {
     console.log(hamburgerMenuIsOpen);
@@ -59,106 +67,144 @@ export function SiteHeader() {
     };
   }, [setHamburgerMenuIsOpen]);
 
+  const formatBalance = (balance: number): string => {
+    const formattedBalance = (balance / 1_000_000).toFixed(2);
+    return `₳ ${formattedBalance}`;
+  };
+
+  const formattedBalance = formatBalance(balance);
+
   return (
     <>
-      <header className="fixed left-0 top-0 z-50 w-full translate-y-[-1rem] animate-fade-in border-b opacity-0 backdrop-blur-[12px] [--animation-delay:600ms]">
-        <div className="container flex h-[3.5rem] items-center justify-between">
-          <Link className="text-md flex items-center" href="/">
-            <img src="logo1.png" alt="Logo" className="w-42 h-10" />
-          </Link>
-          <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
-            {menuItem.map((item) => (
-              <motion.li
-                variants={{
-                  initial: { y: "-20px", opacity: 0 },
-                  open: {
-                    y: 0,
-                    opacity: 1,
-                    transition: { duration: 0.3, ease: "easeOut" },
-                  },
-                }}
-                key={item.id}
-                className="flex h-full items-center hover:text-electric-violet-500"
-              >
-                <Link
-                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
-                    }`}
-                  href={item.href}
+      <Dialog open={isWalletModalOpen} onOpenChange={setIsWalletModalOpen}>
+        <header className="fixed left-0 top-0 z-50 w-full translate-y-[-1rem] animate-fade-in border-b opacity-0 backdrop-blur-[12px] [--animation-delay:600ms]">
+          <div className="container flex h-[3.5rem] items-center justify-between">
+            <Link className="text-md flex items-center" href="/">
+              <img src={theme === 'dark' ? "/logo1.png" : "/logo1d.png"} alt="littlefishs" className="w-42 h-10" />
+            </Link>
+            <div className="flex-grow justify-center items-center gap-x-8 hidden md:flex">
+              {menuItem.map((item) => (
+                <motion.li
+                  variants={{
+                    initial: { y: "-20px", opacity: 0 },
+                    open: {
+                      y: 0,
+                      opacity: 1,
+                      transition: { duration: 0.3, ease: "easeOut" },
+                    },
+                  }}
+                  key={item.id}
+                  className="flex h-full items-center hover:text-electric-violet-500"
                 >
-                  {item.label}
+                  <Link
+                    className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""}`}
+                    href={item.href}
+                  >
+                    {item.label}
+                  </Link>
+                </motion.li>
+              ))}
+            </div>
+            <div className="ml-auto flex h-full items-center">
+              {status === "loading" ? (
+                <div>Loading...</div>
+              ) : status === "authenticated" && session?.user ? (
+                <>
+                  <div className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "mr-6 text-sm flex items-center"
+                  )}>
+                    <User size={16} className="mr-2" />
+                    <span>{session.user.name || 'User'}</span>
+                  </div>
+                  {session.user.verifiedPolicy === "admin" && (
+                    <Link
+                      className={cn(
+                        buttonVariants({ variant: "secondary" }),
+                        "mr-6 text-sm"
+                      )}
+                      href="/settings"
+                    >
+                      Settings
+                    </Link>
+                  )}
+                  <button
+                    className={cn(
+                      buttonVariants({ variant: "secondary" }),
+                      "mr-6 text-sm"
+                    )}
+                    onClick={() => signOut()}
+                  >
+                    Log Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "mr-6 text-sm"
+                    )}
+                    href="/login"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "mr-6 text-sm"
+                    )}
+                    href="/signup"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+              {isConnected ? (
+                <DialogTrigger asChild>
+                  <button
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "mr-6 text-sm"
+                    )}
+                  >
+                    <span className="mr-2">{formattedBalance}</span>
+                    <LogOut size={16} />
+                  </button>
+                </DialogTrigger>
+              ) : (
+                <Link
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "mr-6 text-sm"
+                  )}
+                  href="/wallet"
+                >
+                  Connect Wallet
                 </Link>
-              </motion.li>
-            ))}
+              )}
+              <ModeToggle />
+            </div>
+            <button
+              className="ml-6 md:hidden"
+              onClick={() => setHamburgerMenuIsOpen((open) => !open)}
+            >
+              <span className="sr-only">Toggle menu</span>
+              {hamburgerMenuIsOpen ? <XIcon /> : <AlignJustify />}
+            </button>
           </div>
-          <div className="ml-auto flex h-full items-center">
-            {!session?.user ? <>
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/login"
-              >
-                Login
-              </Link>
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/signup"
-              >
-                Sign Up
-              </Link>
-            </> : <>
-              {session?.user?.verifiedPolicy === "admin" && <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/settings">
-                Settings</Link>}
-              <button
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                onClick={() => signOut()}
-              >
-                Log Out
-              </button>
-            </>}
-            {isConnected ? (
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/wallet"
-              >
-                Disconnect Wallet {balance}
-              </Link>
-            ) : (
-              <Link
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "mr-6 text-sm"
-                )}
-                href="/wallet"
-              >
-                Connect Wallet
-              </Link>
-            )}
+        </header>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Disconnect: {formattedBalance} replace with $</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            
+            <LoginComponent showBackButton={false}  className="mt-4" action="disconnect"/>
+            {/* Add more wallet information here */}
           </div>
-          <button
-            className="ml-6 md:hidden"
-            onClick={() => setHamburgerMenuIsOpen((open) => !open)}
-          >
-            <span className="sr-only">Toggle menu</span>
-            {hamburgerMenuIsOpen ? <XIcon /> : <AlignJustify />}
-          </button>
-        </div>
-      </header >
+        </DialogContent>
+      </Dialog>
       <AnimatePresence>
         <motion.nav
           initial="initial"
@@ -176,7 +222,7 @@ export function SiteHeader() {
             },
           }}
           animate={hamburgerMenuIsOpen ? "animate" : "exit"}
-          className={`fixed left-0 top-0 z-50 h-screen w-full overflow-auto bg-background/70 backdrop-blur-[12px] pointer-events-none`}
+          className={`fixed left-0 top-0 z-50 h-screen w-full overflow-auto bg-background/70 backdrop-blur-[12px] ${hamburgerMenuIsOpen ? "" : "pointer-events-none"}`}
         >
           <div className="container flex h-[3.5rem] items-center justify-between">
             <Link className="text-md flex items-center" href="/">
@@ -210,8 +256,7 @@ export function SiteHeader() {
                 className="border-grey-dark pl-6 py-0.5 border-b md:border-none"
               >
                 <Link
-                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""
-                    }`}
+                  className={`hover:text-grey flex h-[var(--navigation-height)] w-full items-center text-xl transition-[color,transform] duration-300 md:translate-y-0 md:text-sm md:transition-colors ${hamburgerMenuIsOpen ? "[&_a]:translate-y-0" : ""}`}
                   href={item.href}
                 >
                   {item.label}

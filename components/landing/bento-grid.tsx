@@ -3,6 +3,8 @@ import {
   GlobeAltIcon,
   ShieldCheckIcon,
   DocumentDuplicateIcon,
+  RocketLaunchIcon,
+  ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/20/solid";
 import {
   LockClosedIcon,
@@ -11,6 +13,7 @@ import {
   GlobeIcon,
   FileTextIcon,
 } from "@radix-ui/react-icons";
+
 
 const features = [
   {
@@ -23,67 +26,67 @@ const features = [
     background: (
       <img
         src="/open_source.png"
-        className="absolute -right-20 -top-20 opacity-60"
+        className="absolute -right-20 -top-20 opacity-20"
       />
     ),
     className: "lg:row-start-1 lg:row-end-4 lg:col-start-2 lg:col-end-3",
   },
   {
-    Icon: LockClosedIcon,
-    name: "Secure Authentication",
+    Icon: ArrowRightStartOnRectangleIcon,
+    name: "Your Gateway to Web3 Excellence",
     description:
-      "Leverage secure, wallet-based authentication to enhance user trust and data security in your dApps.",
+      "Transform your ideas into reality with our open-source framework that seamlessly integrates NFT and wallet-based authentication. Build, grow, and scale your Cardano project with confidence.",
     href: "/authentication",
     cta: "Learn more",
     background: (
       <img
-        src="/secure_auth.png"
-        className="absolute -right-20 -top-20 opacity-60"
+        src="/ape.png"
+        className="absolute -right-200 -top-200 opacity-20"
       />
     ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-1 lg:row-end-3",
   },
   {
-    Icon: GlobeAltIcon,
-    name: "Global Accessibility",
+    Icon: RocketLaunchIcon,
+    name: "Accelerate Your Development",
     description:
       "Designed to support a global user base with multi-language documentation and community support channels.",
     href: "/global-access",
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
-        className="absolute -right-20 -top-20 opacity-60"
+        src="/accel.png"
+        className="absolute -right-200 -top-200 opacity-20"
       />
     ),
     className: "lg:col-start-1 lg:col-end-2 lg:row-start-3 lg:row-end-4",
   },
   {
     Icon: ShieldCheckIcon,
-    name: "Community Collaboration",
+    name: "Fort Knox-Level Security",
     description:
-      "Encourages community contribution and collaboration to continually enhance the framework.",
+      "Implement rock-solid wallet-based authentication that your community can trust. Keep your users' assets safe while providing a smooth experience.",
     href: "/community",
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
-        className="absolute -right-20 -top-20 opacity-60"
+        src="/secure_auth.png"
+        className="absolute -right-20 -top-20 opacity-20"
       />
     ),
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-1 lg:row-end-2",
   },
   {
     Icon: DocumentDuplicateIcon,
-    name: "Comprehensive Documentation",
+    name: "Knowledge is Power",
     description:
-      "Includes detailed documentation and user guides to help developers integrate the authentication system quickly.",
+      "Comprehensive documentation and guides ensure your team can hit the ground running. From novice to expert, we've got you covered.",
     href: "https://tools.littlefish.foundation/littlefish-research-hub/littlefish-open-source/open-source-nft-and-wallet-auth-framework-for-cardano",
     cta: "Learn more",
     background: (
       <img
-        src="path/to/your/image.jpg"
-        className="absolute -right-20 -top-20 opacity-60"
+        src="/cardano.png"
+        className="absolute -right-20 -top-200 opacity-10"
       />
     ),
     className: "lg:col-start-3 lg:col-end-3 lg:row-start-2 lg:row-end-4",

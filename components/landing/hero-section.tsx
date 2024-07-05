@@ -48,14 +48,10 @@ export default function HeroSection() {
       className="relative mx-auto mt-32 max-w-[80rem] px-6 text-center md:px-8"
     >
       <h1 className="bg-gradient-to-br from-white from-30% to-white/40 bg-clip-text py-6 text-5xl font-medium leading-none tracking-tighter text-transparent text-balance sm:text-4xl md:text-5xl lg:text-6xl translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:200ms]">
-        Cardano enabled Next JS template with wallet auth.
+      Empower Your Cardano Vision with Next.js
       </h1>
       <p className="mb-1 text-lg tracking-tight text-gray-400 md:text-xl text-balance translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:400ms]">
-        Dive into the future of decentralized applications with ease! Our
-        open-source JavaScript framework empowers your Cardano dApps by
-        integrating NFT and wallet-based user authentication seamlessly. Start
-        building secure, innovative applications today and leverage the robust
-        features of blockchain with minimal setup.
+      Unleash the full potential of Web3 with our cutting-edge Cardano-enabled Next.js template. Seamlessly blend blockchain power with modern web development to create dApps that captivate and innovate.
       </p>
 
       <div

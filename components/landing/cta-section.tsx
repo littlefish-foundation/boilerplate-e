@@ -166,9 +166,12 @@ export default function CallToActionSection() {
               </div>
               <div className="z-10 mt-4 flex flex-col items-center text-center text-primary">
                 <h1 className="text-3xl font-bold lg:text-4xl">
-                  Become a littlefish
+                Join the Movement
                 </h1>
-                <Link
+                <p className="mb-1 text-lg tracking-tight text-gray-400 md:text-xl text-balance translate-y-[-1rem] animate-fade-in opacity-0 [--animation-delay:400ms]">
+                🐠 Become a littlefish in the vast Cardano ocean. Together, we're building waves of change.
+      </p>
+                                <Link
                   href="https://discord.com/invite/FhW2xH6c"
                   className={cn(
                     buttonVariants({
