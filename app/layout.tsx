@@ -1,9 +1,37 @@
-"use client";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
+// Remove the "use client" directive from here
+
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
+import SessionWrapper from "@/components/SessionWrapper";
+import ClientProviders from "./ClientProviders"; // We'll create this new component
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <SessionWrapper>
+      <html lang="en">
+        <body className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}>
+          <ClientProviders>{children}</ClientProviders>
+        </body>
+      </html>
+    </SessionWrapper>
+  );
+}
+
+/*
+ClientProviders <- import { ThemeProvider } from "@/components/theme-provider";
+ClientProviders <- import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+here - import { Inter as FontSans } from "next/font/google";
+here - import "./globals.css";
 import Providers from "./Providers";
 import { useEffect, useState } from "react";
 import SessionWrapper from "@/components/SessionWrapper";
@@ -52,3 +80,5 @@ export default function RootLayout({
     </SessionWrapper>
   );
 }
+
+*/

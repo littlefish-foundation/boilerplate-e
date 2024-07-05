@@ -11,7 +11,7 @@ import { useWallet } from "littlefish-nft-auth-framework/frontend";
 import { signOut } from "next-auth/react";
 import ModeToggle from "@/components/ui/mode-toggle";
 import { useTheme } from "next-themes";
-import  LoginComponent  from "@/components/nft-auth/login";
+import LoginComponent from "@/components/nft-auth/login";
 import {
   Dialog,
   DialogContent,
@@ -40,16 +40,6 @@ export function SiteHeader() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { theme } = useTheme();
 
-  // Debugging logs
-  useEffect(() => {
-    console.log("Session status:", status);
-    console.log("Session data:", session);
-  }, [session, status]);
-
-  useEffect(() => {
-    console.log(hamburgerMenuIsOpen);
-  }, [hamburgerMenuIsOpen]);
-
   useEffect(() => {
     const html = document.querySelector("html");
     if (html) html.classList.toggle("overflow-hidden", hamburgerMenuIsOpen);
@@ -57,10 +47,8 @@ export function SiteHeader() {
 
   useEffect(() => {
     const closeHamburgerNavigation = () => setHamburgerMenuIsOpen(false);
-
     window.addEventListener("orientationchange", closeHamburgerNavigation);
     window.addEventListener("resize", closeHamburgerNavigation);
-
     return () => {
       window.removeEventListener("orientationchange", closeHamburgerNavigation);
       window.removeEventListener("resize", closeHamburgerNavigation);
@@ -173,15 +161,15 @@ export function SiteHeader() {
                   </button>
                 </DialogTrigger>
               ) : (
-                <Link
+                <button
                   className={cn(
                     buttonVariants({ variant: "outline" }),
                     "mr-6 text-sm"
                   )}
-                  href="/wallet"
+                  onClick={() => setIsWalletModalOpen(true)}
                 >
                   Connect Wallet
-                </Link>
+                </button>
               )}
               <ModeToggle />
             </div>
@@ -196,12 +184,15 @@ export function SiteHeader() {
         </header>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Disconnect: {formattedBalance} replace with $</DialogTitle>
+            <DialogTitle>{isConnected ? `Disconnect: ${formattedBalance}` : 'Connect Wallet'}</DialogTitle>
           </DialogHeader>
           <div className="p-4">
-            
-            <LoginComponent showBackButton={false}  className="mt-4" action="disconnect"/>
-            {/* Add more wallet information here */}
+            <LoginComponent 
+              showBackButton={false}  
+              className="mt-4" 
+              action={isConnected ? 'disconnect' : 'connect'}
+              onClose={() => setIsWalletModalOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>

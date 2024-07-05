@@ -15,13 +15,15 @@ interface LoginComponentProps {
   showBackButton?: boolean;
   className?: string;
   onClose?: () => void;
+  action?: 'connect' | 'disconnect';
 }
 
 const LoginComponent: React.FC<LoginComponentProps> = ({ 
   onBack, 
   showBackButton = true, 
   className = "",
-  onClose
+  onClose,
+  action = 'connect'
 }) => {
   const router = useRouter();
   const {
@@ -42,10 +44,10 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
     }
   };
 
-  const handleWalletAction = async (action: () => void | Promise<void>) => {
+  const handleWalletAction = async (actionFn: () => void | Promise<void>) => {
     setIsLoading(true);
     try {
-      await Promise.resolve(action());
+      await Promise.resolve(actionFn());
     } catch (error) {
       console.error("Wallet action failed:", error);
     } finally {
@@ -69,46 +71,63 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
       )}
       {isClient && wallets && wallets.length > 0 ? (
         <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
-          <div className="flex flex-col gap-2 text-center">
-            <img
-              className="mx-auto"
-              src="/findtheblackfish.png"
-              width={128}
-              height={128}
-              alt="littlefish logo"
-            />
-            <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Hey littlefish!
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Sign up for an account
-            </p>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                WEB2
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-4">
-            To be filled later with login form
-          </div>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                WEB3
-              </span>
-            </div>
-          </div>
-          <div className="mx-auto grid grid-cols-2 gap-4 sm:w-[350px]">
-            {(isConnected && connectedWallet) ? (
+          {action === 'connect' && (
+            <>
+              <div className="flex flex-col gap-2 text-center">
+                <img
+                  className="mx-auto"
+                  src="/findtheblackfish.png"
+                  width={128}
+                  height={128}
+                  alt="littlefish logo"
+                />
+                <h1 className="text-2xl font-semibold tracking-tight text-white">
+                  Hey littlefish!
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Connect your wallet
+                </p>
+              </div>
+              <div className="mx-auto grid grid-cols-2 gap-4 sm:w-[350px]">
+                {wallets.map((wallet) => {
+                  let displayName = wallet.name === "typhoncip30" ? "Typhon" : wallet.name;
+                  return (
+                    <button
+                      key={wallet.name}
+                      type="submit"
+                      className={cn(buttonVariants({ variant: "outline" }))}
+                      disabled={isLoading}
+                      onClick={() => handleWalletAction(() => connectWallet(wallet))}
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <div className="group relative flex items-center">
+                        <img
+                          src={wallet.icon}
+                          alt={wallet.name}
+                          className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
+                            wallet.name !== connectedWallet?.name ? "grayscale" : ""
+                          }`}
+                        />
+                        <span>
+                          {displayName.charAt(0).toUpperCase() + displayName.slice(1)}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          {action === 'disconnect' && isConnected && connectedWallet && (
+            <>
+              <div className="flex flex-col gap-2 text-center">
+                <h1 className="text-2xl font-semibold tracking-tight text-white">
+                  Disconnect Wallet
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Are you sure you want to disconnect your wallet?
+                </p>
+              </div>
               <button
                 type="submit"
                 className={cn(buttonVariants())}
@@ -120,44 +139,15 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
                   <img
                     src={wallets.find((wallet) => wallet.name === connectedWallet.name)?.icon}
                     alt={connectedWallet.name || 'default-alt-text'}
-                    className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
-                      wallets.find((wallet) => wallet.name !== connectedWallet.name) ? "grayscale" : ""
-                    }`}
+                    className="mr-2 h-4 w-4"
                   />
                   <span>
-                    {connectedWallet.name}
+                    Disconnect {connectedWallet.name}
                   </span>
                 </div>
               </button>
-            ) : (
-              wallets.map((wallet) => {
-                let displayName = wallet.name === "typhoncip30" ? "Typhon" : wallet.name;
-                return (
-                  <button
-                    key={wallet.name}
-                    type="submit"
-                    className={cn(buttonVariants({ variant: "outline" }))}
-                    disabled={isLoading}
-                    onClick={() => handleWalletAction(() => connectWallet(wallet))}
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <div className="group relative flex items-center">
-                      <img
-                        src={wallet.icon}
-                        alt={wallet.name}
-                        className={`mr-2 h-4 w-4 transition-filter duration-100 group-hover:grayscale-0 ${
-                          wallet.name !== connectedWallet?.name ? "grayscale" : ""
-                        }`}
-                      />
-                      <span>
-                        {displayName.charAt(0).toUpperCase() + displayName.slice(1)}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
