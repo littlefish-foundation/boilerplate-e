@@ -98,7 +98,7 @@ export default async function Dashboard() {
                 <TabsTrigger value="nfts">NFTs</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
                 <TabsTrigger value="monitor" className="hidden sm:flex">
-                  Monitor (admin elevation)
+                  Monitor
                 </TabsTrigger>
               </TabsList>
               
@@ -128,7 +128,7 @@ export default async function Dashboard() {
                           Total Sales
                         </TableHead>
                         <TableHead className="hidden md:table-cell">
-                          Created at
+                          Created 
                         </TableHead>
                         <TableHead>
                           <span className="sr-only">Actions</span>
