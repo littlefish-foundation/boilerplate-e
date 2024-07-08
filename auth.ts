@@ -67,6 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.walletAddress = token.walletAddress as string;
       session.user.walletNetwork = token.walletNetwork as number;
       session.user.verifiedPolicy = token.verifiedPolicy as string;
+      console.log({ session })
       return session;
     },
   },
@@ -92,7 +93,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (credentials.email && credentials.password) {
           const email = credentials.email as string;
           const password = credentials.password as string;
-          
+
           const user = await prisma.user.findUnique({
             where: {
               email: email,
@@ -103,6 +104,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           if (!user) {
+            console.error("No user found");
             throw new Error("No user found");
           }
 
@@ -114,7 +116,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: user.email as string,
             password: user.password as string,
           };
-          
+
           const isValid = await loginUser(sanitizedUser, {
             email,
             password,
@@ -179,6 +181,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               10
             )
           };
+          
           const networkConfig = config[walletNetwork as keyof typeof config];
           if (!networkConfig || !networkConfig.apiKey) {
             throw new Error(
@@ -223,6 +226,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             nonce,
             assets,
           });
+
+          const verifiedPolicy = await prisma.policy.findUnique({
+            where: {
+              policyID: asset.policyID,
+            },
+          });
+
+          const strict = await prisma.settings.findFirst();
+
+          if (strict) {
+            if (!verifiedPolicy) return null;
+          }
+
+          user.verifiedPolicy = verifiedPolicy?.policyID as string;
+
+          if (!verifiedPolicy) {
+            throw new Error("Policy not found");
+          }
           if (isValid.success) {
             return user;
           } else {

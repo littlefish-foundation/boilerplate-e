@@ -24,9 +24,14 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
     password
   };
 
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
-  console.log("result", result);
-  return result;
+  try {
+
+    const result = await signIn("credentials", { ...requestBody, redirectTo: "/" });
+    console.log("result", result);
+    return result;
+  } catch (error) {
+    return { error: "Failed to Login With Email" };
+  }
 }
 
 export async function loginWithAsset(walletAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset): Promise<{ success?: boolean; error?: string }> {
@@ -41,14 +46,17 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     assetName: asset.assetName,
     amount: asset.amount,
   };
-
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
-  console.log("result", result);
-  return result;
+  try {
+    const result = await signIn("credentials", { ...requestBody, redirectTo: "/" });
+    console.log("result", result);
+    return result;
+  } catch (error) {
+    return { error: "Failed to Login With Asset" };
+  }
 }
 
 // Function to handle login with Cardano wallet details
-export async function loginWithCardano(walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<User> {
+export async function loginWithCardano(walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = {
     walletAddress,
@@ -57,8 +65,11 @@ export async function loginWithCardano(walletAddress: string, walletNetwork: num
     key,
     nonce,
   };
-
-  const result = await signIn("credentials",{ ...requestBody, redirectTo: "/"});
-  console.log("result", result);
-  return result;
+  try {
+    const result = await signIn("credentials", { ...requestBody, redirectTo: "/" });
+    console.log("result", result);
+    return result;
+  } catch (error) {
+    return { error: "Failed to Login With Wallet, If you signed up with asset, please try logging in with asset" };
+  }
 }
