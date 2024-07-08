@@ -1,0 +1,21 @@
+{
+    "types": [
+      {"type": "feat", "section": "Features"},
+      {"type": "fix", "section": "Bug Fixes"},
+      {"type": "docs", "section": "Documentation"},
+      {"type": "style", "section": "Styles", "hidden": true},
+      {"type": "refactor", "section": "Code Refactoring"},
+      {"type": "perf", "section": "Performance Improvements"},
+      {"type": "test", "section": "Tests", "hidden": true},
+      {"type": "build", "section": "Builds", "hidden": true},
+      {"type": "ci", "section": "Continuous Integration", "hidden": true},
+      {"type": "chore", "section": "Chores", "hidden": true}
+    ],
+    "commitUrlFormat": "https://github.com/littlefish-foundation/boilerplate-e/commit/{{hash}}",
+    "compareUrlFormat": "https://github.com/littlefish-foundation/boilerplate-e/compare/{{previousTag}}...{{currentTag}}",
+    "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]",
+    "scripts": {
+      "prerelease": "npm run lint",
+      "postrelease": "git push --follow-tags origin main"
+    }
+  }
