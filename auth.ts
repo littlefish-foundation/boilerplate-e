@@ -181,7 +181,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               10
             )
           };
-          
+
           const networkConfig = config[walletNetwork as keyof typeof config];
           if (!networkConfig || !networkConfig.apiKey) {
             throw new Error(
@@ -235,14 +235,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const strict = await prisma.settings.findFirst();
 
-          if (strict) {
+          if (strict?.strictPolicy) {
             if (!verifiedPolicy) return null;
           }
-
-          user.verifiedPolicy = verifiedPolicy?.policyID as string;
-
-          if (!verifiedPolicy) {
-            throw new Error("Policy not found");
+          if (verifiedPolicy) {
+            user.verifiedPolicy = verifiedPolicy.policyID as string;
           }
           if (isValid.success) {
             return user;

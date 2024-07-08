@@ -1,21 +1,13 @@
 "use client";
-import {
-  signupWithMail,
-  signupWithCardano,
-  signupWithAsset,
-  generateNonce,
-} from "./signupActions";
+import { signupWithMail, signupWithCardano, generateNonce, signupWithAsset } from "./signupActions";
 import {
   signMessage,
   useWallet,
   WalletConnectButton,
   Asset,
 } from "littlefish-nft-auth-framework/frontend";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
 
 // Function to handle message signing for Cardano wallet
 async function handleSign(
@@ -51,29 +43,35 @@ async function handleSign(
   }
 }
 
-// React component for the signup page
-export default function SignUpPage() {
+// React component for the Signup page
+export default function SignupPage() {
   const {
     isConnected,
     connectedWallet,
     networkID,
     addresses,
-    wallets,
     assets,
+    decodeHexToAscii,
   } = useWallet(); // Destructure wallet connection status and details
   const router = useRouter(); // Initialize router for navigation
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
   const [errorMessage, setErrorMessage] = useState(""); // State for error messages
   const [success, setSuccess] = useState(false); // State for success status
-  const [selectedAsset, setSelectedAsset] = useState(null as Asset | null);
+  const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]); // State for decoded assets
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Function to handle asset signup
-  async function handleAssetSignup(asset: Asset) {
+  useEffect(() => {
+    if (assets.length > 0) {
+      setDecodedAssets(decodeHexToAscii(assets));
+    }
+  }, [isConnected]);
+
+  // Function to handle Signup with Cardano wallet
+  async function handleCardanoSignup(asset?: Asset) {
     if (connectedWallet) {
       try {
         // Sign the message using the wallet
-        // The address comes as an array of length 1 usually from the wallet, so we use the first address
         const signResponse = await handleSign(
           connectedWallet.name,
           isConnected,
@@ -82,72 +80,42 @@ export default function SignUpPage() {
         if (signResponse) {
           const [key, signature] = signResponse; // Destructure key and signature from the response
           // Perform signup with the Cardano wallet details
-          const result = await signupWithAsset(
-            addresses[0],
-            networkID,
-            key,
-            signature,
-            asset
-          );
-          if (result.success) {
+          let result;
+          if (asset) {
+            result = await signupWithAsset(
+              addresses[0],
+              networkID,
+              key,
+              signature,
+              asset
+            );
+          } else {
+            result = await signupWithCardano(
+              addresses[0],
+              networkID,
+              key,
+              signature
+            );
+          }
+          if (result) {
             setSuccess(true); // Set success status to true
             setErrorMessage(""); // Clear error message
-            router.push("/login"); // Navigate to login page
+            console.log("result", result);
+            router.push("/"); // Navigate to assets page
           } else {
-            setErrorMessage(result.error || "Signup failed"); // Set error message if signup fails
+            setErrorMessage(result || "Signup failed"); // Set error message if signup fails
             setSuccess(false); // Set success status to false
           }
         }
       } catch (error) {
-        console.error("Error signing message:", error); // Log any errors that occur during message signing
-        setErrorMessage("Error signing message"); // Set error message for signing error
+        console.error("Failed to handle Cardano signup:", error); // Log any errors that occur during Cardano signup
+        setErrorMessage("Failed to handle Cardano signup"); // Set error message for Cardano signup failure
         setSuccess(false); // Set success status to false
       }
-    } else {
-      setErrorMessage("Wallet not connected"); // Set error message if wallet is not connected
     }
   }
 
-  // Function to handle Cardano wallet signup
-  async function handleCardanoSignup() {
-    if (connectedWallet) {
-      try {
-        // Sign the message using the wallet
-        // The address comes as an array of length 1 usually from the wallet, so we use the first address
-        const signResponse = await handleSign(
-          connectedWallet.name,
-          isConnected,
-          addresses[0]
-        );
-        if (signResponse) {
-          const [key, signature] = signResponse; // Destructure key and signature from the response
-          // Perform signup with the Cardano wallet details
-          const result = await signupWithCardano(
-            addresses[0],
-            networkID,
-            key,
-            signature
-          );
-          if (result.success) {
-            setSuccess(true); // Set success status to true
-            setErrorMessage(""); // Clear error message
-            router.push("/login"); // Navigate to login page
-          } else {
-            setErrorMessage(result.error || "Signup failed"); // Set error message if signup fails
-            setSuccess(false); // Set success status to false
-          }
-        }
-      } catch (error) {
-        console.error("Error signing message:", error); // Log any errors that occur during message signing
-        setErrorMessage("Error signing message"); // Set error message for signing error
-        setSuccess(false); // Set success status to false
-      }
-    } else {
-      setErrorMessage("Wallet not connected"); // Set error message if wallet is not connected
-    }
-  }
-
-  // Function to handle email signup
+  // Function to handle signup with email and password
   async function handleEmailSignup() {
     try {
       // Perform signup with email and password
@@ -155,7 +123,7 @@ export default function SignUpPage() {
       if (result.success) {
         setSuccess(true); // Set success status to true
         setErrorMessage(""); // Clear error message
-        router.push("/login"); // Navigate to login page
+        router.push("/loign"); // Navigate to assets page
       } else {
         setErrorMessage(result.error || "Signup failed"); // Set error message if signup fails
         setSuccess(false); // Set success status to false
@@ -168,124 +136,81 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
+      <WalletConnectButton onAssetSelect={handleCardanoSignup} />
+      <form className="w-full max-w-sm p-4 bg-gray-800 rounded shadow-md">
+        <input
+          type="text"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </form>
       <button
-        onClick={() => router.back()} // Use router.back to navigate to the previous page
-        className={cn(
-          buttonVariants({ variant: "ghost" }), // Apply ghost variant styling to the button
-          "absolute left-4 top-4 md:left-8 md:top-8 flex items-center"
-        )}
+        onClick={handleEmailSignup}
+        className="w-full max-w-sm p-2 mt-4 font-semibold text-white bg-blue-500 rounded shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <ChevronLeft className="mr-2 h-4 w-4" />{" "}
-        {/* ChevronLeft icon for back button */}
-        Back
+        Signup with Email
       </button>
-      <div className="mx-auto flex w-full flex-col justify-center gap-6 sm:w-[350px]">
-        <div className="flex flex-col gap-2 text-center">
-          {/* <Icons.logo className="mx-auto h-6 w-6" /> */}
-          <img
-            className="mx-auto"
-            src="/findtheblackfish.png"
-            width={128}
-            height={128}
-            alt="littlefish logo"
-          />
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
-            Hey littlefish!
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Sign up for an account
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          To be filled later with login form
-        </div>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              WEB3
-            </span>
-          </div>
-        </div>
-        <div className="mx-auto grid grid-cols-1 gap-4 sm:w-[350px]">
-          {wallets ? (
-            <WalletConnectButton
-              onAssetSelect={handleAssetSignup}
-            />
-          ) : (
-            <p className="text-center text-xl mt-4"> no wallets available</p>
-          )}
-          {/* Button to connect the wallet */}
-          <div className={cn("grid gap-6")}>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  WEB2
-                </span>
-              </div>
-            </div>
-            <form>
-              <div className="grid gap-4">
-                <input
-                  type="text"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2 mb-4 border rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </form>
-
+      {isConnected && (
+        <>
+          <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
             <button
-              onClick={handleEmailSignup}
-              className={cn(buttonVariants({ variant: "outline" }))}
+              onClick={() => handleCardanoSignup()}
+              className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              Signup with Email
+              Signup with Wallet
             </button>
           </div>
-          {isConnected ? (
+          {!isDropdownOpen ? (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+            <button className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" onClick={() => setIsDropdownOpen(true)}>
+              Signup With Assets
+            </button>
+          </div>) : (
             <>
-              <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
-                <button
-                  onClick={() => handleCardanoSignup()}
-                  className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  Signup with Wallet
-                </button>
-              </div>
+              {
+                assets.length === 0 ? (<div>No Asset Found</div>) : (<div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+                  {decodedAssets.length === 0 ? (
+                    <div>No Decoded Asset Found</div>
+                  ) : (
+                    <div className="w-full max-w-sm mt-4 p-4 bg-gray-800 rounded shadow-md">
+                      {decodedAssets.map((asset, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleCardanoSignup(assets[index] as Asset)}
+                          className="w-full p-2 mb-2 font-semibold text-white bg-green-500 rounded shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                          {asset.assetName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>)
+              }
             </>
-          ) : (
-            <h1 className="text-center text-xl mt-4">
-              Connect your wallet to signup
-            </h1>
+
           )}
-          {errorMessage && ( // Display error message if present
-            <div>
-              <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">
-                {errorMessage}
-              </div>
-              <div className="flex flex-col gap-4">
-                
-              </div>
-            </div>
-          )}
+
+        </>
+      )}
+      {errorMessage && ( // Display error message if present
+        <div className="w-full max-w-sm mt-4 p-2 bg-red-500 text-white text-center rounded">
+          {errorMessage}
         </div>
-      </div>
+      )}
+      {success && ( // Display success message if signup is successful
+        <div className="w-full max-w-sm mt-4 p-2 bg-green-500 text-white text-center rounded">
+          Signup Successful
+        </div>
+      )}
     </div>
   );
 }
