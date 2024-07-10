@@ -39,6 +39,12 @@ export function SiteHeader() {
   const { data: session, status } = useSession();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { theme } = useTheme();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const handleLoginSuccess = () => {
+    setIsLoginOpen(false);
+    // Handle successful login (e.g., update user state, redirect, etc.)
+  };
 
   useEffect(() => {
     const html = document.querySelector("html");

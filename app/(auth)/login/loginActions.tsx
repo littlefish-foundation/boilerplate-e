@@ -48,7 +48,7 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
 }
 
 // Function to handle login with Cardano wallet details
-export async function loginWithCardano(walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<User> {
+export async function loginWithCardano(walletAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = {
     walletAddress,
