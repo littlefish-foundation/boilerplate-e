@@ -19,8 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
-import { set } from "react-hook-form";
-import { log } from "console";
 
 const menuItem = [
   {
@@ -78,6 +76,10 @@ export function SiteHeader() {
 
   const handleLogout = async () => {
     await logout();
+    // Refresh the page after logout
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
   };
 
   return (
@@ -139,7 +141,7 @@ export function SiteHeader() {
                       buttonVariants({ variant: "secondary" }),
                       "mr-6 text-sm"
                     )}
-                    onClick={logout}
+                    onClick={handleLogout}
                   >
                     Log Out
                   </button>

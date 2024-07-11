@@ -1,5 +1,4 @@
-import { cookies } from 'next/headers'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface User {
   walletAddress?: string
@@ -12,36 +11,46 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function checkSession() {
-      try {
-        const res = await fetch('/api/session', { credentials: 'include' })
-        if (res.ok) {
-          const userData = await res.json()
-          setUser(userData)
-        } else {
-          setUser(null)
-        }
-      } catch (error) {
-        console.error('Failed to check session:', error)
+  const checkSession = useCallback(async () => {
+    try {
+      const res = await fetch('/api/session', { credentials: 'include' })
+      if (res.ok) {
+        const userData = await res.json()
+        setUser(userData)
+      } else {
         setUser(null)
-      } finally {
-        setLoading(false)
       }
+    } catch (error) {
+      console.error('Failed to check session:', error)
+      setUser(null)
+    } finally {
+      setLoading(false)
     }
-
-    checkSession()
   }, [])
+
+  useEffect(() => {
+    checkSession()
+  }, [checkSession])
 
   const logout = async () => {
     try {
-      // Remove JWT token from cookies
-      cookies().delete('auth-token')
-      setUser(null); // Clear user state
+      const res = await fetch('/api/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        throw new Error(res.statusText)
+      }
+      setUser(null)
     } catch (error) {
-      console.error('Failed to logout:', error);
+      console.error('Failed to logout:', error)
     }
   };
 
-  return { user, loading, logout}
+  const refreshUser = useCallback(() => {
+    setLoading(true)
+    checkSession()
+  }, [checkSession])
+
+  return { user, loading, logout, refreshUser }
 }
