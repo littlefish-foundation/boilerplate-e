@@ -2,6 +2,7 @@ import { loginUser, setConfig } from "littlefish-nft-auth-framework/backend";
 import * as jose from "jose"; // Import the jose library for JWT handling
 import { PrismaClient, User } from "@prisma/client"; // Import PrismaClient and User type
 import { Asset } from "littlefish-nft-auth-framework/frontend"; // Import the Asset type from the frontend
+import prisma from "@/app/lib/prisma";
 
 const config = {
   0: {
@@ -27,126 +28,160 @@ interface UserWithAssets extends User {
 
 // Define the POST function to handle login requests
 export async function POST(request: Request) {
-    // Parse the incoming JSON request body
-    const body = await request.json();
-    let user: UserWithAssets | null; // Declare a variable to store the user details
+  // Parse the incoming JSON request body
+  const body = await request.json();
+  let user: UserWithAssets | null; // Declare a variable to store the user details
+  let verifiedPolicy: String;
 
-    // Destructure relevant fields from the request body
-    const {
-      email,
-      password,
-      walletAddress,
-      walletNetwork,
-      signature,
-      key,
-      nonce,
-      asset,
-    } = body;
+  // Destructure relevant fields from the request body
+  const {
+    email,
+    password,
+    walletAddress,
+    walletNetwork,
+    signature,
+    key,
+    nonce,
+    policyID,
+    assetName,
+    amount,
+  } = body;
 
-    if (!email) {
-      const networkConfig = config[walletNetwork as keyof typeof config];
-      console.log('Network Config:', networkConfig); // Add this line
-      if (!networkConfig || !networkConfig.apiKey) {
-        throw new Error(
-          "Configuration for the provided network is missing or incomplete."
-        );
-      }
-      setConfig(networkConfig.apiKey, networkConfig.networkId);
-    }
-
-    // Check if the login is using email and password
-    if (email && password) {
-      // Find the user by email in the database
-      user = (await prismaClient.user.findFirst({
-        where: {
-          email,
-        },
-        include: {
-          assets: true,
-        },
-      })) as UserWithAssets;
-    } else if (walletAddress) {
-      // Find the user by wallet address in the database
-      user = (await prismaClient.user.findFirst({
-        where: {
-          walletAddress,
-          walletNetwork,
-        },
-        include: {
-          assets: true,
-        },
-      })) as UserWithAssets;
-    } else {
-      // If no login method is provided, return an error response
-      return new Response(JSON.stringify({ error: "Invalid login method" }), {
-        status: 400,
-      });
-    }
-
-    // If no user is found, return an error response
-    if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 400,
-      });
-    }
-
-    // Sanitize the user object to ensure compatibility with loginUser function
-    let sanitizedUser;
-    if (asset) {
-      const matchingAsset = user.assets.some(
-        (userAsset: Asset) =>
-          asset.policyID === userAsset.policyID &&
-          asset.assetName === userAsset.assetName
-      );
-      if (!matchingAsset) {
-        return new Response(JSON.stringify({ error: "Asset not found" }), {
-          status: 400,
-        });
-      }
-      sanitizedUser = {
-        ...user,
-        email: user.email ?? undefined,
-        password: user.password ?? undefined,
-        stakeAddress: user.walletAddress ?? undefined, // Changed field name
-        walletNetwork: user.walletNetwork ?? undefined,
-        asset: asset,
-      };
-    } else {
-      sanitizedUser = {
-        ...user,
-        email: user.email ?? undefined,
-        password: user.password ?? undefined,
-        stakeAddress: user.walletAddress ?? undefined, // Changed field name
-        walletNetwork: user.walletNetwork ?? undefined,
-      };
-    }
-
-    // Call the loginUser function with the sanitized user details and request body
-    const result = await loginUser(sanitizedUser, {
-      ...body,
-      stakeAddress: walletAddress,
+  if (email && password) {
+    // If email and password are provided, attempt to login with email and password
+    verifiedPolicy = "null";
+    user = await prisma.user.findFirst({
+      where: { email },
+      include: { assets: true },
     });
-
-    // If the loginUser function returns an error, return an error response
-    if (!result.success) {
-      return new Response(JSON.stringify({ error: result.error }), {
-        status: 400,
-      });
+    if (user?.verifiedPolicy === "admin") {
+      verifiedPolicy = "admin";
     }
 
-    // Prepare the JWT secret and algorithm
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const alg = "HS256";
+    // If the user does not exist, return a 404 response
+    if (!user) {
+      return new Response("User not found", { status: 404 });
+    }
 
-    // Create and sign a new JWT
-    const jwt = await new jose.SignJWT({})
-      .setProtectedHeader({ alg }) // Set the algorithm in the protected header
-      .setIssuedAt() // Set the issued at time
-      .setIssuer("littlefish") // Set the issuer
-      .setSubject(user.id) // Set the subject to the user ID
-      .setExpirationTime("2h") // Set the expiration time to 2 hours
-      .sign(secret); // Sign the JWT with the secret
+    if (user.assets.length !== 0) {
+      return new Response("Asset details required for this user", { status: 400 })
+    }
 
-    // Return a response with the signed JWT
-    return new Response(JSON.stringify({ token: jwt }), { status: 200 });
+    const sanitizedUser = {
+      email: user.email as string,
+      password: user.password as string,
+    };
+    const isValid = await loginUser(sanitizedUser, { email, password });
+    if (!isValid.success) {
+      return new Response("Invalid credentials", { status: 401 });
+    }
+  }
+
+  else if (walletAddress && walletNetwork && signature && key && nonce) {
+    const networkConfig = config[walletNetwork as keyof typeof config];
+    if (!networkConfig || !networkConfig.apiKey) {
+      return new Response("Configuration for the provided network is missing or incomplete.", { status: 400 });
+    }
+    setConfig(networkConfig.apiKey, networkConfig.networkId);
+    // If wallet details are provided, attempt to login with wallet details
+    verifiedPolicy = "null";
+    user = await prisma.user.findFirst({
+      where: { walletAddress },
+      include: { assets: true },
+    });
+    // If the user does not exist, return a 404 response
+    if (!user) {
+      return new Response("User not found", { status: 404 });
+    }
+    if (policyID && assetName && amount) {
+      const asset = { policyID, assetName, amount };
+      const verifiedPolicies = await prisma.policy.findMany();
+      if (user.verifiedPolicy !== "admin") {
+        if (verifiedPolicies.some((policy) => policy.policyID === asset.policyID)) {
+          verifiedPolicy = asset.policyID;
+        }
+      }
+      if (user.verifiedPolicy === "admin") {
+        verifiedPolicy = "admin";
+      }
+
+      const assetToSanitize = user.assets.find((matchingAsset) => matchingAsset.policyID === asset.policyID && matchingAsset.assetName === asset.assetName);
+      if (!assetToSanitize) {
+        throw new Error("No asset found for this user");
+      }
+      const sanitizedAsset = {
+        policyID: assetToSanitize.policyID,
+        assetName: assetToSanitize.assetName,
+        amount: assetToSanitize.amount,
+      };
+
+      const sanitizedUser = {
+        stakeAddress: user.walletAddress as string,
+        walletNetwork: user.walletNetwork as number,
+        asset: sanitizedAsset,
+      };
+
+      const isValid = await loginUser(sanitizedUser, {
+        stakeAddress: walletAddress,
+        walletNetwork,
+        signature,
+        key,
+        nonce,
+        assets: [asset],
+      });
+      if (!isValid.success) {
+        return new Response("Invalid credentials", { status: 401 });
+      }
+    } else {
+      if (user.assets.length !== 0) {
+        return new Response("Asset details required for this user", { status: 400 });
+      }
+
+      const sanitizedUser = {
+        walletAddress: user.walletAddress as string,
+        walletNetwork: user.walletNetwork as number,
+      };
+
+      if (user.verifiedPolicy === "admin") {
+        verifiedPolicy = "admin";
+      }
+
+      const isValid = await loginUser(sanitizedUser, {
+        stakeAddress: walletAddress,
+        walletNetwork,
+        signature,
+        key,
+        nonce,
+      });
+
+      if (!isValid.success) {
+        return new Response("Invalid credentials", { status: 401 });
+      }
+    }
+  }
+  else {
+    return new Response("Invalid request", { status: 400 });
+  }
+
+
+  // Prepare the JWT secret and algorithm
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const alg = "HS256";
+
+  // Create and sign a new JWT
+  const jwt = await new jose.SignJWT({
+    walletAddress: user.walletAddress,
+    email: user.email,
+    walletNetwork: user.walletNetwork,
+    verifiedPolicy: verifiedPolicy
+  })
+    .setProtectedHeader({ alg }) // Set the algorithm in the protected header
+    .setIssuedAt() // Set the issued at time
+    .setIssuer("littlefish") // Set the issuer
+    .setSubject(user.id) // Set the subject to the user ID
+    .setExpirationTime("2h") // Set the expiration time to 2 hours
+    .sign(secret); // Sign the JWT with the secret
+
+  // Return a response with the signed JWT
+  return new Response(JSON.stringify({ token: jwt }), { status: 200, headers: { "Content-Type": "application/json" } });
 }
