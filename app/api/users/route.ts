@@ -12,6 +12,51 @@ export async function GET(request: Request) {
     });
 }
 
+export async function POST(request: Request) {
+    const { id } = await request.json();
+    const user = await prisma.user.findUnique({
+        where: { id: id },
+    });
+
+    if (!user) {
+        return new Response(JSON.stringify({ error: "User not found" }), {
+            status: 404,
+        });
+    }
+
+    // Update the user verifiedPolicy
+    const verifiedPolicy = "admin";
+    if (user.verifiedPolicy === verifiedPolicy) {
+        try {
+            const updatedUser = await prisma.user.update({
+                where: { id: user.id },
+                data: { verifiedPolicy: null },
+            });
+            return new Response(JSON.stringify(updatedUser), {
+                status: 200,
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: "Failed to update user" }), {
+                status: 500,
+            });
+        }
+    } else {
+        try {
+            const updatedUser = await prisma.user.update({
+                where: { id: user.id },
+                data: { verifiedPolicy },
+            });
+            return new Response(JSON.stringify(updatedUser), {
+                status: 200,
+            });
+        } catch (error) {
+            return new Response(JSON.stringify({ error: "Failed to update user" }), {
+                status: 500,
+            });
+        }
+    }
+}
+
 export async function DELETE(request: Request) {
     const { id } = await request.json();
 

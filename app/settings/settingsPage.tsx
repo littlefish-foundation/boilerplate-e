@@ -11,10 +11,12 @@ interface Policy {
 
 interface User {
     id: string;
+    email: string;
     walletAddress: string;
     walletNetwork: number;
     createdAt: string;
     updatedAt: string;
+    verifiedPolicy: string;
 }
 
 export default function SettingsPage() {
@@ -45,6 +47,24 @@ export default function SettingsPage() {
         } else {
             const errorData = await response.json();
             setMessage(errorData.error || "Failed to delete user.");
+        }
+    }
+
+    async function addAdmin(userId: string) {
+        const response = await fetch("/api/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id: userId }),
+        });
+
+        if (response.ok) {
+            setMessage("User role updated successfully.");
+            fetchUsers(); // Update the users list after role update
+        } else {
+            const errorData = await response.json();
+            setMessage(errorData.error || "Failed to update user role.");
         }
     }
 
@@ -191,16 +211,32 @@ export default function SettingsPage() {
                     users.map((user) => {
                         return (
                             <li key={user.id} className="border-b border-gray-200 py-2">
-                                <p><strong>Wallet Address:</strong> {user.walletAddress}</p>
-                                <p><strong>Wallet Network:</strong> {user.walletNetwork}</p>
-                                <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
-                                <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
+                                {user.email && <p><strong>Email:</strong> {user.email}</p>}
+                                {user.walletAddress && <><p><strong>Wallet Address:</strong> {user.walletAddress}</p>
+                                    <p><strong>Wallet Network:</strong> {user.walletNetwork}</p>
+                                    <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
+                                    <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p></>}
+                                <p><strong>Role:</strong> {user.verifiedPolicy}</p>
                                 <button
                                     onClick={() => deleteUser(user.id)}
                                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                 >
                                     Delete
                                 </button>
+                                {user.verifiedPolicy === "admin" ? (<button
+                                    onClick={() => addAdmin(user.id)}
+                                    className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                >
+                                    Remove Admin Role
+                                </button>) : (
+                                    <button
+                                        onClick={() => addAdmin(user.id)}
+                                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    >
+                                        Give Admin Role
+                                    </button>
+                                )}
+
                             </li>
                         );
                     })
