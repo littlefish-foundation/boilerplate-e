@@ -88,7 +88,7 @@ export default function LoginPage() {
       const result = await loginWithMail(email, password);
       if (result.success) {
         setMessage({ type: "success", content: "Login Successful" });
-        router.push("/assets");
+        router.push("/");
       } else {
         setMessage({ type: "error", content: result.error || "Login failed" });
       }

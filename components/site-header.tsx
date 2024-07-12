@@ -31,6 +31,16 @@ const menuItem = [
     label: "Framework Demo",
     href: "/assets",
   },
+  {
+    id: 3,
+    label: "ADA Handle Access",
+    href: "/asset1",
+  },
+  {
+    id: 4,
+    label: "HOSKY Access",
+    href: "/asset2",
+  }
 ];
 
 export function SiteHeader() {

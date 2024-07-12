@@ -70,7 +70,7 @@ export default function SignupPage() {
           }
           if (result.success) {
             setMessage({ type: "success", content: "Signup Successful" });
-            router.push("/");
+            router.push("/login");
           } else {
             setMessage({ type: "error", content: result.error || "Signup failed" });
           }
@@ -88,7 +88,7 @@ export default function SignupPage() {
       const result = await signupWithMail(email, password);
       if (result.success) {
         setMessage({ type: "success", content: "Signup Successful" });
-        router.push("/assets");
+        router.push("/login");
       } else {
         setMessage({ type: "error", content: result.error || "Signup failed" });
       }
