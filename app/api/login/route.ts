@@ -138,22 +138,23 @@ export async function POST(request: Request) {
       }
 
       const sanitizedUser = {
-        walletAddress: user.walletAddress as string,
+        stakeAddress: user.walletAddress as string,
         walletNetwork: user.walletNetwork as number,
       };
 
       if (user.verifiedPolicy === "admin") {
         verifiedPolicy = "admin";
       }
-
+      console.log(sanitizedUser.stakeAddress === walletAddress);
+      console.log(sanitizedUser.walletNetwork === walletNetwork);
       const isValid = await loginUser(sanitizedUser, {
         stakeAddress: walletAddress,
         walletNetwork,
         signature,
         key,
-        nonce,
+        nonce
       });
-
+      console.log(isValid.error);
       if (!isValid.success) {
         return new Response("Invalid credentials", { status: 401 });
       }
