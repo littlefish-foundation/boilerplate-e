@@ -77,7 +77,8 @@ export async function POST(request: Request) {
     }
   }
 
-  else if (walletAddress && walletNetwork && signature && key && nonce) {
+  else if (walletAddress && signature && key && nonce) {
+    console.log(walletAddress, walletNetwork, signature, key, nonce);
     const networkConfig = config[walletNetwork as keyof typeof config];
     if (!networkConfig || !networkConfig.apiKey) {
       return new Response("Configuration for the provided network is missing or incomplete.", { status: 400 });
