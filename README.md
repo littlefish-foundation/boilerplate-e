@@ -71,6 +71,19 @@ This project demonstrates the implementation of the Littlefish NFT Auth Framewor
 3. Explore the dashboard to view your authentication status and wallet information.
 4. Access the settings page to manage your account preferences.
 
+## Additional Resources
+
+- [NPM Package](https://www.npmjs.com/package/littlefish-nft-auth-framework)
+- [Additional Documentation](https://tools.littlefish.foundation/littlefish-research-hub/littlefish-open-source/open-source-nft-and-wallet-auth-framework-for-cardano)
+- [Project Milestones](https://milestones.projectcatalyst.io/projects/1100213)
+
+## Join Us
+
+We welcome you to join our community:
+
+- [Discord](https://discord.gg/96Rjg4b2T6)
+- [Twitter](https://x.com/littlefishDAO)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
