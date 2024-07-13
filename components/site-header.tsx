@@ -1,7 +1,6 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
-import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlignJustify, XIcon, LogOut, User } from "lucide-react";
@@ -46,7 +45,6 @@ const menuItem = [
 export function SiteHeader() {
   const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
-  const { data: session, status } = useSession();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { theme } = useTheme();
   const [isLoginOpen, setIsLoginOpen] = useState(false);

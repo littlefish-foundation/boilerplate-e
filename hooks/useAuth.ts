@@ -13,11 +13,14 @@ export function useAuth() {
 
   const checkSession = useCallback(async () => {
     try {
-      const res = await fetch('/api/session', { credentials: 'include' })
+      const res = await fetch("/api/session", { credentials: 'include' })
       if (res.ok) {
         const userData = await res.json()
         setUser(userData)
+      } else if (res.status === 401) {
+        setUser(null)
       } else {
+        console.error('Unexpected error during session check:', res.status, res.statusText)
         setUser(null)
       }
     } catch (error) {
