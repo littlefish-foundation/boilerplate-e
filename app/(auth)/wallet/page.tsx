@@ -108,7 +108,6 @@ export default function LoginPage() {
               wallets.map((wallet) => {
                 // Update the wallet name if it is "Typhoncip30"
                 let displayName = "";
-                console.log(wallet.name);
                 wallet.name === "typhoncip30" ? displayName = "Typhon" : displayName = wallet.name;
                 return (
                   <button

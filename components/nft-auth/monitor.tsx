@@ -45,7 +45,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/hooks/useAuth"
 import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
 import { useEffect } from "react"
@@ -73,7 +73,7 @@ interface User {
 
 
 export function MonitorPane(): JSX.Element {
-    const { data: session, status } = useSession();
+    const { user} = useAuth();
     const isAuthenticated = status === "authenticated";
     const { assets, isConnected, addresses, wallets, connectedWallet } = useWallet();
     
@@ -103,9 +103,9 @@ export function MonitorPane(): JSX.Element {
               {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
               </div>
               <p className="text-xs text-muted-foreground">
-              {isAuthenticated && session?.user && (
+              {isAuthenticated && user && (
                 <div className="text-xs text-muted-foreground">
-                  <p>Logged in as: {session.user.walletAddress || session.user.email || 'N/A'}</p>
+                  <p>Logged in as: {user.walletAddress || user.email || 'N/A'}</p>
                   
                 </div>
               )}

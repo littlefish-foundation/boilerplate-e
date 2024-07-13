@@ -1,14 +1,12 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlignJustify, XIcon, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
-import { signOut } from "next-auth/react";
 import ModeToggle from "@/components/ui/mode-toggle";
 import { useTheme } from "next-themes";
 import LoginComponent from "@/components/nft-auth/login";
@@ -19,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
 
 const menuItem = [
   {
@@ -31,14 +30,35 @@ const menuItem = [
     label: "Framework Demo",
     href: "/assets",
   },
+  {
+    id: 3,
+    label: "ADA Handle Access",
+    href: "/asset1",
+  },
+  {
+    id: 4,
+    label: "HOSKY Access",
+    href: "/asset2",
+  }
 ];
 
 export function SiteHeader() {
   const { isConnected, balance } = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
-  const { data: session, status } = useSession();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const { theme } = useTheme();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { user, loading, logout } = useAuth();
+  const [ isLoggedIn, setIsLoggedIn ] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setIsLoggedIn(false);
+    }
+    if (!loading && user){
+      setIsLoggedIn(true);
+    }
+  }, [user, loading]);
 
   useEffect(() => {
     const html = document.querySelector("html");
@@ -61,6 +81,14 @@ export function SiteHeader() {
   };
 
   const formattedBalance = formatBalance(balance);
+
+  const handleLogout = async () => {
+    await logout();
+    // Refresh the page after logout
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
 
   return (
     <>
@@ -96,16 +124,16 @@ export function SiteHeader() {
             <div className="ml-auto flex h-full items-center">
               {status === "loading" ? (
                 <div>Loading...</div>
-              ) : status === "authenticated" && session?.user ? (
+              ) : (isLoggedIn && user) ? (
                 <>
                   <div className={cn(
                     buttonVariants({ variant: "outline" }),
                     "mr-6 text-sm flex items-center"
                   )}>
                     <User size={16} className="mr-2" />
-                    <span>{session.user.name || 'User'}</span>
+                    <span>{'User'}</span>
                   </div>
-                  {session.user.verifiedPolicy === "admin" && (
+                  {user.verifiedPolicy === "admin" && (
                     <Link
                       className={cn(
                         buttonVariants({ variant: "secondary" }),
@@ -121,7 +149,7 @@ export function SiteHeader() {
                       buttonVariants({ variant: "secondary" }),
                       "mr-6 text-sm"
                     )}
-                    onClick={() => signOut()}
+                    onClick={handleLogout}
                   >
                     Log Out
                   </button>

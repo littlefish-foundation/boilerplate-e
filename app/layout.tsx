@@ -1,7 +1,6 @@
 // /app/layout.tsx
 import { Inter as FontSans } from "next/font/google";
 import "./globals.css";
-import SessionWrapper from "@/components/SessionWrapper";
 import ClientProviders from "./ClientProviders";
 
 const fontSans = FontSans({
@@ -17,9 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`min-h-screen bg-background font-sans antialiased ${fontSans.variable}`}>
-        <SessionWrapper>
           <ClientProviders>{children}</ClientProviders>
-        </SessionWrapper>
       </body>
     </html>
   );
