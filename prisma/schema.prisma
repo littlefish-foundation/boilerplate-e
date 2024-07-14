@@ -29,9 +29,23 @@ model User {
   accounts              Account[]
   sessions              Session[]
 
+  adaHandles ADAHandle[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ADAHandle {
+  id           String  @id @default(cuid())
+  name         String
+  handleId     String  @unique
+  userId       String
+  user         User    @relation(fields: [userId], references: [id])
+  isDefault    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 model Asset {
   id        String @id @default(cuid())

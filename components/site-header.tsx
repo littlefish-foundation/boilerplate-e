@@ -8,6 +8,7 @@ import { AlignJustify, XIcon, LogOut, User, Wallet, Settings, CreditCard  } from
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useWallet } from "littlefish-nft-auth-framework/frontend";
+import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
 import ModeToggle from "@/components/ui/mode-toggle";
 import { useTheme } from "next-themes";
 import { Label } from "@/components/ui/label";
@@ -50,7 +51,7 @@ function hexToAscii(hex: string): string {
 }
 
 export function SiteHeader() {
-  const { isConnected, balance, addresses, wallets, connectedWallet, assets} = useWallet();
+  const { isConnected, balance, addresses, wallets, connectedWallet, assets, networkID} = useWallet();
   const [hamburgerMenuIsOpen, setHamburgerMenuIsOpen] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -63,6 +64,11 @@ export function SiteHeader() {
   const [loginMessage, setLoginMessage] = useState({ type: "", content: "" });
   const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   
+  const stakeAddress = addresses && addresses.length > 0 ? convertHexToBech32(addresses[0], 1) : ''
+  
+
+
+
   const router = useRouter();
 
   useEffect(() => {
@@ -71,12 +77,57 @@ export function SiteHeader() {
   }, [hamburgerMenuIsOpen]);
 
   useEffect(() => {
-    const findAdaHandleAndHosky = () => {
-      if (isConnected && assets && assets.length > 0) {
-        const adaHandleAsset = assets.find(asset => asset.policyID === ADA_HANDLE_POLICY_ID);
-        if (adaHandleAsset) {
-          const decodedHandle = hexToAscii(adaHandleAsset.assetName);
-          setAdaHandle(decodedHandle);
+    const findAdaHandleAndHosky = async () => {
+      if (isConnected && assets && assets.length > 0 && stakeAddress) {
+        const adaHandleAssets = assets.filter(asset => asset.policyID === ADA_HANDLE_POLICY_ID);
+        const adaHandles = adaHandleAssets.map(asset => ({
+          name: hexToAscii(asset.assetName),
+          id: asset.assetName
+        }));
+  
+        console.log('ADA Handles:', adaHandles);
+  
+        if (adaHandles.length > 0) {
+          try {
+            const response = await fetch(`/api/nft-auth/${stakeAddress}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                action: 'getDefault',
+                adaHandles: adaHandles
+              }),
+            });
+  
+            if (response.ok) {
+              const data = await response.json();
+              if (data.defaultHandle) {
+                setAdaHandle(data.defaultHandle.name);
+              } else if (adaHandles.length > 0) {
+                setAdaHandle(adaHandles[0].name);
+                // If no default handle is set, set the first one as default
+                await fetch(`/api/nft-auth/${stakeAddress}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    action: 'setDefault',
+                    handleId: adaHandles[0].id
+                  }),
+                });
+              } else {
+                setAdaHandle(null);
+              }
+            } else {
+              console.error('Failed to fetch ADA handles');
+              setAdaHandle(null);
+            }
+          } catch (error) {
+            console.error('Error fetching ADA handles:', error);
+            setAdaHandle(null);
+          }
         } else {
           setAdaHandle(null);
         }
@@ -90,7 +141,7 @@ export function SiteHeader() {
     };
   
     findAdaHandleAndHosky();
-  }, [isConnected, assets]);
+  }, [isConnected, assets, stakeAddress]);
 
   useEffect(() => {
     const closeHamburgerNavigation = () => setHamburgerMenuIsOpen(false);

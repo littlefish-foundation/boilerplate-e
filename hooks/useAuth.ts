@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
+import { User } from '@/types';
 
-interface User {
-  walletAddress?: string
-  email?: string
-  walletNetwork?: number
-  verifiedPolicy?: string
-}
+
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
