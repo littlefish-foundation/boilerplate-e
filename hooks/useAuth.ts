@@ -18,6 +18,7 @@ export function useAuth() {
         const userData = await res.json()
         setUser(userData)
       } else if (res.status === 401) {
+        // This is an expected state when the user is not logged in
         setUser(null)
       } else {
         console.error('Unexpected error during session check:', res.status, res.statusText)
@@ -52,7 +53,7 @@ export function useAuth() {
 
   const refreshUser = useCallback(() => {
     setLoading(true)
-    checkSession()
+    return checkSession()
   }, [checkSession])
 
   return { user, loading, logout, refreshUser }
