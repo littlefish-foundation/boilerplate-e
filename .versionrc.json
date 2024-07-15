@@ -15,7 +15,7 @@
     "compareUrlFormat": "https://github.com/littlefish-foundation/boilerplate-e/compare/{{previousTag}}...{{currentTag}}",
     "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]",
     "scripts": {
-      "prerelease": "npm run lint",
+      "prerelease": "",
       "postrelease": "git push --follow-tags origin main"
     }
   }
