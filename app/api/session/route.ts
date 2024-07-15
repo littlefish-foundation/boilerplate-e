@@ -15,6 +15,17 @@ export async function GET(request: Request) {
     try {
         const { payload } = await jose.jwtVerify(token, JWT_SECRET)
 
+        // Set the cookie_support_check cookie if it doesn't exist
+        if (!cookies().get('cookie_support_check')) {
+            cookies().set('cookie_support_check', '1', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60, // 24 hours
+                path: '/',
+            });
+        }
+
         return Response.json({
             walletAddress: payload.walletAddress,
             email: payload.email,
