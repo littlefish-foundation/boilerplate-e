@@ -39,21 +39,6 @@ async function getPolicies(): Promise<Policy[]> {
 }
 
 export async function middleware(request: NextRequest) {
-    if (request.nextUrl.pathname === '/cookies-required') {
-        return NextResponse.next()
-    }
-
-    const cookieCheckPerformed = request.cookies.has('cookie_check_performed')
-
-    if (!cookieCheckPerformed) {
-        return NextResponse.next()
-    }
-
-    if (!request.cookies.has('cookie_support_check')) {
-        // Cookies are not supported or blocked, redirect to cookie-required page
-        return NextResponse.redirect(new URL('/cookies-required', request.url))
-    }
-
     const authPaths = ['/settings', '/dashboard', '/asset1', '/asset2']
     const adminPaths = ['/settings']
     const assetPaths = {
@@ -107,5 +92,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/settings/:path*', '/dashboard/:path*', '/asset1/:path*', '/asset2/:path*', '/cookies-required', '/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/settings/:path*', '/dashboard/:path*', '/asset1/:path*', '/asset2/:path*'],
 }
