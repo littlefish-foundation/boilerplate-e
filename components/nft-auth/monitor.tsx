@@ -12,7 +12,6 @@ import {
   Users,
 } from "lucide-react"
 
-
 import {
   Avatar,
   AvatarFallback,
@@ -28,6 +27,16 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import {
   Table,
   TableBody,
   TableCell,
@@ -39,63 +48,67 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
-import { useEffect, useState } from "react"
-import { VersionChecker } from '@/components/nft-auth/VersionChecker'; // Make sure this import path is correct
-import { ADAHandleCard } from "./ADAHandleCard";
-import { User } from '@/types';
+import { useEffect } from "react"
 
-const ADA_HANDLE_POLICY_ID = "f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a";
+// Define types for the session and user
+interface User {
+    walletAddress?: string
+    email?: string
+    walletNetwork?: number
+    verifiedPolicy?: string
+  }
+  
+  interface Session {
+    user: User
+  }
+  
+  // New component for the auth status light
+  const AuthStatusLight: React.FC<{ isAuthenticated: boolean }> = ({ isAuthenticated }) => (
+    <div 
+      className={`w-4 h-4 rounded-full ${isAuthenticated ? 'bg-green-500' : 'bg-red-500'}`}
+      title={isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+    />
+  )
 
-
-
-// New component for the auth status light
-const AuthStatusLight: React.FC<{ user: User | null }> = ({ user }) => (
-  <div 
-    className={`w-4 h-4 rounded-full ${user ? 'bg-green-500' : 'bg-red-500'}`}
-    title={user ? 'Authenticated' : 'Not Authenticated'}
-  />
-)
 
 
 export function MonitorPane(): JSX.Element {
-  const { user } = useAuth();
-  const { assets, isConnected, addresses, wallets, connectedWallet } = useWallet();
-  const [adaHandle, setAdaHandle] = useState<string | null>(null);
-  
+    const { user} = useAuth();
+    const isAuthenticated = status === "authenticated";
+    const { assets, isConnected, addresses, wallets, connectedWallet } = useWallet();
+    
+    const stakeAddress = addresses && addresses.length > 0 ? convertHexToBech32(addresses[0], 1) : ''
 
-  const stakeAddress = addresses && addresses.length > 0 ? convertHexToBech32(addresses[0], 1) : ''
-
-  // New function to get wallet icon
-  const getWalletIcon = (walletName: string) => {
-    const wallet = wallets.find(w => w.name === walletName)
-    return wallet ? wallet.icon : ''
-  }
-
-  
-
-
+    // New function to get wallet icon
+    const getWalletIcon = (walletName: string) => {
+        const wallet = wallets.find(w => w.name === walletName)
+        return wallet ? wallet.icon : ''
+    }
+    
 
   return (
     <div className="flex min-h-screen w-full flex-col">
+     
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-18">
-        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
           <Card x-chunk="dashboard-01-chunk-0">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-large">
                 Signin Status
               </CardTitle>
-              <Badge variant="outline"> <AuthStatusLight user={user} /></Badge>
+              <Badge variant="outline"> <AuthStatusLight isAuthenticated={isAuthenticated} /></Badge>
             </CardHeader>
             <CardContent>
               <div className="font-bold">
-                {user ? 'Authenticated' : 'Not Authenticated'}
+              {isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
               </div>
               <p className="text-xs text-muted-foreground">
-                {user && user && (
-                  <div className="text-xs text-muted-foreground">
-                    Logged in as: {user.walletAddress || user.email || 'N/A'}
-                  </div>
-                )}
+              {isAuthenticated && user && (
+                <div className="text-xs text-muted-foreground">
+                  <p>Logged in as: {user.walletAddress || user.email || 'N/A'}</p>
+                  
+                </div>
+              )}
               </p>
             </CardContent>
           </Card>
@@ -110,7 +123,7 @@ export function MonitorPane(): JSX.Element {
               </Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-1xl font-bold flex items-center">
+            <div className="text-1xl font-bold flex items-center">
                 {connectedWallet && (
                   <img
                     src={getWalletIcon(connectedWallet.name)}
@@ -127,22 +140,44 @@ export function MonitorPane(): JSX.Element {
           </Card>
           <Card x-chunk="dashboard-01-chunk-2">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Framework Version</CardTitle>
+              <CardTitle className="text-sm font-medium">Sales</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <VersionChecker />
-              <p className="text-xs text-muted-foreground mt-2">
-                Check for updates on GitHub
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
               </p>
             </CardContent>
           </Card>
-          
-        
-          <ADAHandleCard />
+          <Card x-chunk="dashboard-01-chunk-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573</div>
+              <p className="text-xs text-muted-foreground">
+                +201 since last hour
+              </p>
+            </CardContent>
+          </Card>
         </div>
         <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-       
+          <Card x-chunk="dashboard-01-chunk-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
           <Card x-chunk="dashboard-01-chunk-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -169,7 +204,18 @@ export function MonitorPane(): JSX.Element {
               </p>
             </CardContent>
           </Card>
-          
+          <Card x-chunk="dashboard-01-chunk-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573</div>
+              <p className="text-xs text-muted-foreground">
+                +201 since last hour
+              </p>
+            </CardContent>
+          </Card>
         </div>
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
           <Card

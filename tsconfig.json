@@ -2,7 +2,6 @@
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "target": "es5",
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -13,7 +12,6 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "forceConsistentCasingInFileNames": true,
     "plugins": [
       {
         "name": "next"
@@ -23,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": [".d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "contexts/MetadataContext.tsx"],
+  "include": [".d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

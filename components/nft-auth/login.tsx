@@ -16,7 +16,6 @@ interface LoginComponentProps {
   className?: string;
   onClose?: () => void;
   action?: 'connect' | 'disconnect';
-  onDisconnect?: () => Promise<void>;
 }
 
 const LoginComponent: React.FC<LoginComponentProps> = ({ 
@@ -24,11 +23,9 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
   showBackButton = true, 
   className = "",
   onClose,
-  action = 'connect',
-  onDisconnect
+  action = 'connect'
 }) => {
   const router = useRouter();
-  
   const {
     isConnected,
     connectWallet,
@@ -46,17 +43,6 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
       router.back();
     }
   };
-
-  const handleDisconnect = async () => {
-    if (onDisconnect) {
-      await onDisconnect();
-    }
-    await disconnectWallet();
-    if (onClose) {
-      onClose();
-    }
-  };
-
 
   const handleWalletAction = async (actionFn: () => void | Promise<void>) => {
     setIsLoading(true);
@@ -134,6 +120,14 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
           )}
           {action === 'disconnect' && isConnected && connectedWallet && (
             <>
+              <div className="flex flex-col gap-2 text-center">
+                <h1 className="text-2xl font-semibold tracking-tight text-white">
+                  Disconnect Wallet
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Are you sure you want to disconnect your wallet?
+                </p>
+              </div>
               <button
                 type="submit"
                 className={cn(buttonVariants())}
@@ -152,7 +146,6 @@ const LoginComponent: React.FC<LoginComponentProps> = ({
                   </span>
                 </div>
               </button>
-              
             </>
           )}
         </div>

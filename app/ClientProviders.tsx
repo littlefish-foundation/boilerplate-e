@@ -3,6 +3,8 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import Providers from "./Providers";
+// import { MetadataProvider } from '@/contexts/MetadataContext';
+// import WalletMetadataFetcher from '@/components/nft-auth/WalletMetadataFetcher';
 import { useEffect, useState } from "react";
 
 const ClientProviders = ({ children }: { children: React.ReactNode }) => {
@@ -15,12 +17,19 @@ const ClientProviders = ({ children }: { children: React.ReactNode }) => {
   if (!hasMounted) {
     return null;
   }
+  /*
+  <MetadataProvider>
+          <WalletMetadataFetcher />
+          {children}
+        </MetadataProvider>
+        */
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <Providers>
         
-        {children}
+          {children}
+        
       </Providers>
       <Toaster />
     </ThemeProvider>
