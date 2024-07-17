@@ -1,6 +1,27 @@
 import prisma from "@/app/lib/prisma";
+import { cookies } from 'next/headers';
+
+function getCookies() {
+    try {
+        return cookies();
+    } catch (error) {
+        console.error('Failed to access cookies:', error);
+        return null;
+    }
+}
+
+function isAuthenticated() {
+    const cookiesObj = getCookies();
+    return cookiesObj && cookiesObj.get('auth-token');
+}
 
 export async function GET(request: Request) {
+    if (!isAuthenticated()) {
+        return new Response(JSON.stringify({ error: "Authentication failed" }), {
+            status: 401,
+        });
+    }
+
     const users = await prisma.user.findMany();
     if (!users) {
         return new Response(JSON.stringify({ error: "No users found" }), {
@@ -13,6 +34,12 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    if (!isAuthenticated()) {
+        return new Response(JSON.stringify({ error: "Authentication failed" }), {
+            status: 401,
+        });
+    }
+
     const { id } = await request.json();
     const user = await prisma.user.findUnique({
         where: { id: id },
@@ -58,6 +85,12 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+    if (!isAuthenticated()) {
+        return new Response(JSON.stringify({ error: "Authentication failed" }), {
+            status: 401,
+        });
+    }
+    
     const { id } = await request.json();
 
     if (!id) {

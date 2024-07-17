@@ -3,7 +3,21 @@ import * as jose from 'jose'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
+function getCookies() {
+    try {
+        return cookies();
+    } catch (error) {
+        console.error('Failed to access cookies:', error);
+        return null;
+    }
+}
+
 export async function GET(request: Request) {
+    const cookiesObj = getCookies();
+    if (!cookiesObj) {
+        return Response.json({ error: "Cookie access blocked" }, { status: 403 });
+    }
+    
     const token = cookies().get('auth-token')?.value
 
     if (!token) {
