@@ -5,7 +5,7 @@ import { loginWithMail, loginWithCardano, generateNonce, loginWithAsset } from "
 import { signMessage, useWallet, Asset } from "littlefish-nft-auth-framework/frontend";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter  } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Mail, Wallet, ChevronLeft } from "lucide-react";

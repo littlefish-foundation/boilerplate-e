@@ -18,15 +18,16 @@ export default async function Page() {
   const cookieStore = cookies()
   const token = cookieStore.get('auth-token')
 
+  if (!token) {
+    redirect('/login')
+    return null // This line is necessary to satisfy TypeScript
+  }
+
   const response = await fetch(`${process.env.ROOT_URL}/api/policy`);
   if (!response.ok) {
     throw new Error(`Failed to fetch policies: ${response.statusText}`);
   }
   const data: Policy[] = await response.json();
-
-  if (!token) {
-    redirect('/login')
-  }
   const { payload } = await jose.jwtVerify(token.value, JWT_SECRET)
 
   // Set the cookie_support_check cookie if it doesn't exist
