@@ -2,7 +2,7 @@ import prisma from "@/app/lib/prisma";
 import { hashPassword, signupUser } from "littlefish-nft-auth-framework/backend";
 import { setConfig } from "littlefish-nft-auth-framework/backend";
 
-const config = {
+const getConfig = () => ({
   0: {
     // preprod
     apiKey: process.env.PREPROD_API_KEY,
@@ -14,7 +14,7 @@ const config = {
     networkId: "mainnet",
   },
   // Add other networks as needed
-};
+});
 // Define the POST function to handle signup requests
 export async function POST(request: Request) {
   // Get all the policy IDs from the database
@@ -34,11 +34,10 @@ export async function POST(request: Request) {
 
   // Call the signupUser function with the request body and get the result
   if (!body.email) {
+    const config = getConfig();
     const networkConfig = config[body.walletNetwork as keyof typeof config];
     if (!networkConfig || !networkConfig.apiKey) {
-      throw new Error(
-        "Configuration for the provided network is missing or incomplete."
-      );
+      return new Response(JSON.stringify({ error: "Invalid network configuration" }), { status: 400 });
     }
     setConfig(networkConfig.apiKey, networkConfig.networkId);
   }
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
         emailVerified: new Date(),
       },
     });
-  } else {
+  } else if (result.stakeAddress) {
     // Handle wallet signup
     // Check if a user with the given wallet address already exists
     const existingWalletUser = await prisma.user.findFirst({

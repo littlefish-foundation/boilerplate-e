@@ -4,7 +4,7 @@ import { PrismaClient, User } from "@prisma/client"; // Import PrismaClient and 
 import { Asset } from "littlefish-nft-auth-framework/frontend"; // Import the Asset type from the frontend
 import prisma from "@/app/lib/prisma";
 
-const config = {
+const getConfig = () => ({
   0: {
     // preprod
     apiKey: process.env.PREPROD_API_KEY,
@@ -16,7 +16,7 @@ const config = {
     networkId: "mainnet",
   },
   // Add other networks as needed
-};
+});
 
 // Initialize Prisma Client
 const prismaClient = new PrismaClient();
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   }
 
   else if (walletAddress && signature && key && nonce) {
-    console.log(walletAddress, walletNetwork, signature, key, nonce);
+    const config = getConfig();
     const networkConfig = config[walletNetwork as keyof typeof config];
     if (!networkConfig || !networkConfig.apiKey) {
       return new Response("Configuration for the provided network is missing or incomplete.", { status: 400 });
@@ -146,8 +146,6 @@ export async function POST(request: Request) {
       if (user.verifiedPolicy === "admin") {
         verifiedPolicy = "admin";
       }
-      console.log(sanitizedUser.stakeAddress === walletAddress);
-      console.log(sanitizedUser.walletNetwork === walletNetwork);
       const isValid = await loginUser(sanitizedUser, {
         stakeAddress: walletAddress,
         walletNetwork,
@@ -155,7 +153,6 @@ export async function POST(request: Request) {
         key,
         nonce
       });
-      console.log(isValid.error);
       if (!isValid.success) {
         return new Response("Invalid credentials", { status: 401 });
       }

@@ -32,7 +32,7 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
 }
 
 export default function SignupPage() {
-  const { isConnected, connectedWallet, networkID, addresses, assets, decodeHexToAscii, wallets, connectWallet, disconnectWallet } = useWallet();
+  const { isConnected, connectedWallet, networkID, addresses, assets = [], decodeHexToAscii, wallets, connectWallet, disconnectWallet } = useWallet();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

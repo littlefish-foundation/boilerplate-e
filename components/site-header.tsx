@@ -21,22 +21,17 @@ import { useAuth } from "@/hooks/useAuth";
 
 const menuItem = [
   {
-    id: 2,
-    label: "Dashboard",
-    href: "/dashboard",
-  },
-  {
     id: 1,
     label: "Framework Demo",
     href: "/assets",
   },
   {
-    id: 3,
+    id: 2,
     label: "ADA Handle Access",
     href: "/asset1",
   },
   {
-    id: 4,
+    id: 3,
     label: "HOSKY Access",
     href: "/asset2",
   }
