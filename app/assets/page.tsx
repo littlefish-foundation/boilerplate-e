@@ -3,6 +3,26 @@ import React, { useState, useEffect } from "react";
 import { Asset, useWallet } from "littlefish-nft-auth-framework/frontend";
 import { BorderBeam } from "@/components/magicui/border-beam";
 
+async function fetchMetadata(policyID: string, assetName: string): Promise<string> {
+  const url = `https://cardano-mainnet.blockfrost.io/api/v0/assets/${policyID}${assetName}`;
+  console.log(process.env.MAINNET_API_KEY)
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      project_id: "mainnetymTzcAM0wcV5zvFl4kFp9mcCOZ3pAABm",  // Ensure the environment variable is set correctly
+    },
+  });
+  console.log(response);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch metadata");
+  }
+  const data = await response.json();
+  console.log(data.onchain_metadata.name);
+  return data.metadata;
+}
+
 // Define the CardComponent function component
 const CardComponent = () => {
   const { assets, isConnected, decodeHexToAscii } = useWallet(); // Destructure wallet assets, connection status, and decoding function from useWallet hook
@@ -35,9 +55,10 @@ const CardComponent = () => {
             onMouseEnter={() => setHoverIndex(index)} // Set the hover index on mouse enter
             onMouseLeave={() => setHoverIndex(null)} // Reset the hover index on mouse leave
           >
-            <div
+            <button
               className="relative bg-black border-2 border-purple-100 shadow-md rounded-lg px-4 py-4"
               style={{ borderColor: "rgba(168, 85, 247, 0.2)" }}
+              onClick={() => fetchMetadata(item.policyID, assets[index].assetName)}
             >
               {hoverIndex === index && (
                 // Render BorderBeam component if the current index matches the hover index
@@ -66,7 +87,7 @@ const CardComponent = () => {
                 </React.Fragment>
               )}
               <p className="text-gray-600">Amount: {item.amount}</p>
-            </div>
+            </button>
           </div>
         ))}
     </div>
