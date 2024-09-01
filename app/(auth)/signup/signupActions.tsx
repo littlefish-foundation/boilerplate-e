@@ -4,7 +4,7 @@ import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-au
 import { Asset } from "littlefish-nft-auth-framework/frontend";
 
 // Declare a variable to store the nonce
-let nonce: string;
+export let nonce: string;
 
 // Function to generate a nonce using random bytes
 export async function generateNonce(): Promise<string | void> {
@@ -29,7 +29,7 @@ export async function signupWithMail(
   if (!validPassword) {
     return { error: "Password weak" };
   }
-  
+
   // Create a JSON request body with the email and hashed password
   const requestBody = JSON.stringify({ email: email, password: password });
 
@@ -64,7 +64,7 @@ export async function signupWithMail(
   }
 }
 
-export async function signupWithAsset(stakeAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset): Promise<{ success?: boolean; error?: string }> {
+export async function signupWithAsset(stakeAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset, sso: boolean): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = JSON.stringify({
     stakeAddress,
@@ -76,15 +76,25 @@ export async function signupWithAsset(stakeAddress: string, walletNetwork: numbe
   });
 
   try {
-    // Send a POST request to the signup API with the request body
-    const response = await fetch(`${process.env.ROOT_URL}/api/signup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: requestBody,
-    });
-
+    let response;
+    if (sso) {
+      response = await fetch(`${process.env.ROOT_URL}/api/sso`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      });
+    } else {
+      // Send a POST request to the signup API with the request body
+      response = await fetch(`${process.env.ROOT_URL}/api/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      });
+    }
     // Check if the response is not OK (i.e., an error occurred)
     if (!response.ok) {
       // Read the response as text to see what went wrong
@@ -108,7 +118,7 @@ export async function signupWithAsset(stakeAddress: string, walletNetwork: numbe
 }
 
 // Function to handle signup with Cardano wallet details
-export async function signupWithCardano( stakeAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
+export async function signupWithCardano(stakeAddress: string, walletNetwork: number, key: string, signature: string): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = JSON.stringify({
     stakeAddress,

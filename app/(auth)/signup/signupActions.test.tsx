@@ -75,7 +75,8 @@ describe('Signup Actions', () => {
         0,
         'mockKey',
         'mockSignature',
-        { policyID: 'mockPolicy', assetName: 'mockAsset', amount: 1 }
+        { policyID: 'mockPolicy', assetName: 'mockAsset', amount: 1 },
+        false
       );
       expect(result).toEqual({ success: true });
     });
@@ -91,7 +92,8 @@ describe('Signup Actions', () => {
         0,
         'mockKey',
         'mockSignature',
-        { policyID: 'mockPolicy', assetName: 'mockAsset', amount: 1 }
+        { policyID: 'mockPolicy', assetName: 'mockAsset', amount: 1 },
+        false
       );
       expect(result).toEqual({ error: 'User already exists' });
     });

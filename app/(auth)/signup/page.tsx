@@ -56,7 +56,7 @@ export default function SignupPage() {
     router.back();
   };
 
-  async function handleCardanoSignup(asset?: Asset) {
+  async function handleCardanoSignup(sso: boolean, asset?: Asset) {
     if (connectedWallet) {
       try {
         const signResponse = await handleSign(connectedWallet.name, isConnected, addresses[0]);
@@ -64,7 +64,7 @@ export default function SignupPage() {
           const [key, signature] = signResponse;
           let result;
           if (asset) {
-            result = await signupWithAsset(addresses[0], networkID, key, signature, asset);
+            result = await signupWithAsset(addresses[0], networkID, key, signature, asset, sso);
           } else {
             result = await signupWithCardano(addresses[0], networkID, key, signature);
           }
@@ -187,7 +187,7 @@ export default function SignupPage() {
                     </div>
                   )}
                   <Button
-                    onClick={() => handleCardanoSignup()}
+                    onClick={() => handleCardanoSignup(false)}
                     className="w-full"
                     disabled={!isConnected}
                   >
@@ -200,7 +200,7 @@ export default function SignupPage() {
                       {decodedAssets.map((asset, index) => (
                         <Button
                           key={index}
-                          onClick={() => handleCardanoSignup(assets[index] as Asset)}
+                          onClick={() => handleCardanoSignup(false, assets[index] as Asset)}
                           className="w-full mb-2"
                         >
                           {asset.assetName}

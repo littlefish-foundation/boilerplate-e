@@ -5,12 +5,26 @@ import { loginWithMail, loginWithCardano, generateNonce, loginWithAsset } from "
 import { signMessage, useWallet, Asset } from "littlefish-nft-auth-framework/frontend";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter  } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Mail, Wallet, ChevronLeft } from "lucide-react";
 
+interface Policy {
+  id: string;
+  policyID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function PolicyList() {
+  const response = await fetch("/api/ssoPolicy");
+  const data: Policy[] = await response.json();
+  return data;
+}
+
 async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
+
   const nonceResponse = await generateNonce();
   if (!nonceResponse) {
     console.error("Failed to generate nonce");
@@ -39,12 +53,50 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ type: "", content: "" });
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]);
   const [activeTab, setActiveTab] = useState("email");
+  const [policies, setPolicies] = useState<String[]>([]);
+  const [ssoAssets, setSSOAssets] = useState<Asset[]>([]);
+  const [nonSsoAssets, setNonSsoAssets] = useState<Asset[]>([]);
 
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
     }
   }, [assets, decodeHexToAscii]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPoliciesAndFilterAssets = async () => {
+      try {
+        const data = await PolicyList();
+        if (!isMounted) return;
+  
+        const policyIDs = new Set(data.map((policy: Policy) => policy.policyID));
+        
+        const [ssoAssets, nonSsoAssets] = assets.reduce(
+          ([sso, nonSso], asset) => {
+            if (policyIDs.has(asset.policyID)) {
+              sso.push(asset);
+            } else {
+              nonSso.push(asset);
+            }
+            return [sso, nonSso];
+          },
+          [[], []] as [Asset[], Asset[]]
+        );
+  
+        setSSOAssets(ssoAssets);
+        setNonSsoAssets(nonSsoAssets);
+      } catch (error) {
+        console.error("Failed to fetch policies or filter assets:", error);
+      }
+    };
+  
+    fetchPoliciesAndFilterAssets();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [assets]);
 
   useEffect(() => {
     if (!isConnected) {
@@ -56,7 +108,7 @@ export default function LoginPage() {
     router.back();
   };
 
-  async function handleCardanoLogin(asset?: Asset) {
+  async function handleCardanoLogin(sso: boolean, asset?: Asset) {
     if (connectedWallet) {
       try {
         const signResponse = await handleSign(connectedWallet.name, isConnected, addresses[0]);
@@ -64,7 +116,7 @@ export default function LoginPage() {
           const [key, signature] = signResponse;
           let result;
           if (asset) {
-            result = await loginWithAsset(addresses[0], networkID, key, signature, asset);
+            result = await loginWithAsset(addresses[0], networkID, key, signature, asset, sso);
           } else {
             result = await loginWithCardano(addresses[0], networkID, key, signature);
           }
@@ -97,6 +149,7 @@ export default function LoginPage() {
       setMessage({ type: "error", content: "Email login failed" });
     }
   }
+  console.log(ssoAssets)
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-black p-4">
@@ -188,7 +241,7 @@ export default function LoginPage() {
                     </div>
                   )}
                   <Button
-                    onClick={() => handleCardanoLogin()}
+                    onClick={() => handleCardanoLogin(false)}
                     className="w-full"
                     disabled={!isConnected}
                   >
@@ -198,10 +251,24 @@ export default function LoginPage() {
                   {isConnected && decodedAssets.length > 0 && (
                     <div className="space-y-2">
                       <Label>Login with Asset</Label>
-                      {decodedAssets.map((asset, index) => (
+                      {nonSsoAssets.map((asset, index) => (
                         <Button
                           key={index}
-                          onClick={() => handleCardanoLogin(assets[index] as Asset)}
+                          onClick={() => handleCardanoLogin(false, assets[index] as Asset)}
+                          className="w-full mb-2"
+                        >
+                          {asset.assetName}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {isConnected && ssoAssets.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>SSO</Label>
+                      {ssoAssets.map((asset, index) => (
+                        <Button
+                          key={index}
+                          onClick={() => handleCardanoLogin(true, ssoAssets[index] as Asset)}
                           className="w-full mb-2"
                         >
                           {asset.assetName}

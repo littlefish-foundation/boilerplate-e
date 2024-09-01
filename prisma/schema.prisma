@@ -25,9 +25,23 @@ model User {
   walletAddressVerified DateTime?
   walletNetwork         Int?
   verifiedPolicy        String?
+  ssoData               Sso[]
   assets                Asset[]
   accounts              Account[]
   sessions              Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Sso {
+  id         String @id @default(cuid())
+  policyID   String
+  UserId     String
+  usageCount Int?
+  lastUsed   DateTime?
+  tiedTo     String?
+  user       User   @relation(fields: [UserId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,6 +60,14 @@ model Asset {
 }
 
 model Policy {
+  id       String @id @default(cuid())
+  policyID String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SsoPolicy {
   id       String @id @default(cuid())
   policyID String @unique
 
