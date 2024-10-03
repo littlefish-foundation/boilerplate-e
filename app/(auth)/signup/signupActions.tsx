@@ -4,7 +4,7 @@ import { validateEmail, hashPassword, validatePassword } from "littlefish-nft-au
 import { Asset } from "littlefish-nft-auth-framework/frontend";
 
 // Declare a variable to store the nonce
-export let nonce: string;
+let nonce: string;
 
 // Function to generate a nonce using random bytes
 export async function generateNonce(): Promise<string | void> {

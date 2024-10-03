@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupWithMail, signupWithCardano, generateNonce, signupWithAsset } from "./signupActions";
+import { loginWithAsset } from "../login/loginActions";
 import { signMessage, useWallet, Asset } from "littlefish-nft-auth-framework/frontend";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,19 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Mail, Wallet, ChevronLeft } from "lucide-react";
+
+interface Policy {
+  id: string;
+  policyID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function PolicyList() {
+  const response = await fetch("/api/ssoPolicy");
+  const data: Policy[] = await response.json();
+  return data;
+}
 
 async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
   const nonceResponse = await generateNonce();
@@ -39,12 +53,49 @@ export default function SignupPage() {
   const [message, setMessage] = useState({ type: "", content: "" });
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]);
   const [activeTab, setActiveTab] = useState("email");
+  const [ssoAssets, setSSOAssets] = useState<Asset[]>([]);
+  const [nonSsoAssets, setNonSsoAssets] = useState<Asset[]>([]);
 
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
     }
   }, [assets, decodeHexToAscii]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPoliciesAndFilterAssets = async () => {
+      try {
+        const data = await PolicyList();
+        if (!isMounted) return;
+
+        const policyIDs = new Set(data.map((policy: Policy) => policy.policyID));
+
+        const [ssoAssets, nonSsoAssets] = assets.reduce(
+          ([sso, nonSso], asset) => {
+            if (policyIDs.has(asset.policyID)) {
+              sso.push(asset);
+            } else {
+              nonSso.push(asset);
+            }
+            return [sso, nonSso];
+          },
+          [[], []] as [Asset[], Asset[]]
+        );
+
+        setSSOAssets(ssoAssets);
+        setNonSsoAssets(nonSsoAssets);
+      } catch (error) {
+        console.error("Failed to fetch policies or filter assets:", error);
+      }
+    };
+
+    fetchPoliciesAndFilterAssets();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [assets]);
 
   useEffect(() => {
     if (!isConnected) {
@@ -55,6 +106,34 @@ export default function SignupPage() {
   const handleBack = () => {
     router.back();
   };
+
+  async function handleCardanoLogin(sso: boolean, asset?: Asset) {
+    if (connectedWallet) {
+      try {
+        const signResponse = await handleSign(connectedWallet.name, isConnected, addresses[0]);
+        if (signResponse) {
+          const [key, signature] = signResponse;
+          let result;
+          if (asset) {
+            result = await loginWithAsset(addresses[0], networkID, key, signature, asset, sso);
+          } else {
+            setMessage({ type: "error", content: "No asset selected" });
+          }
+          if (result && result.success) {
+            setMessage({ type: "success", content: "Login Successful" });
+            router.push("/");
+          } else if (result && result.error) {
+            setMessage({ type: "error", content: result.error || "Login failed" });
+          } else {
+            setMessage({ type: "error", content: "Login failed" });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to handle Cardano login:", error);
+        setMessage({ type: "error", content: "Failed to handle Cardano login" });
+      }
+    }
+  }
 
   async function handleCardanoSignup(sso: boolean, asset?: Asset) {
     if (connectedWallet) {
@@ -197,10 +276,24 @@ export default function SignupPage() {
                   {isConnected && decodedAssets.length > 0 && (
                     <div className="space-y-2">
                       <Label>Signup with Asset</Label>
-                      {decodedAssets.map((asset, index) => (
+                      {nonSsoAssets.map((asset, index) => (
                         <Button
                           key={index}
                           onClick={() => handleCardanoSignup(false, assets[index] as Asset)}
+                          className="w-full mb-2"
+                        >
+                          {asset.assetName}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  {isConnected && ssoAssets.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>SSO</Label>
+                      {ssoAssets.map((asset, index) => (
+                        <Button
+                          key={index}
+                          onClick={() => handleCardanoLogin(true, ssoAssets[index] as Asset)}
                           className="w-full mb-2"
                         >
                           {asset.assetName}

@@ -53,7 +53,6 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ type: "", content: "" });
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]);
   const [activeTab, setActiveTab] = useState("email");
-  const [policies, setPolicies] = useState<String[]>([]);
   const [ssoAssets, setSSOAssets] = useState<Asset[]>([]);
   const [nonSsoAssets, setNonSsoAssets] = useState<Asset[]>([]);
 
