@@ -70,10 +70,11 @@ export default function SignupPage() {
         if (!isMounted) return;
 
         const policyIDs = new Set(data.map((policy: Policy) => policy.policyID));
-
+        console.log("policyIDs", policyIDs);
         const [ssoAssets, nonSsoAssets] = assets.reduce(
           ([sso, nonSso], asset) => {
             if (policyIDs.has(asset.policyID)) {
+              console.log("asset", asset);
               sso.push(asset);
             } else {
               nonSso.push(asset);

@@ -169,6 +169,7 @@ export async function POST(request: Request) {
 
   // Create and sign a new JWT
   const jwt = await new jose.SignJWT({
+    id: user.id,
     walletAddress: user.walletAddress,
     email: user.email,
     walletNetwork: user.walletNetwork,

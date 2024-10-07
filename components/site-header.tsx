@@ -34,7 +34,17 @@ const menuItem = [
     id: 3,
     label: "HOSKY Access",
     href: "/asset2",
-  }
+  },
+  {
+    id: 4,
+    label: "SSO Access",
+    href: "/asset3",
+  },
+  {
+    id: 5,
+    label: "Metadatas",
+    href: "/metadata",
+  },
 ];
 
 export function SiteHeader() {
@@ -121,13 +131,15 @@ export function SiteHeader() {
                 <div>Loading...</div>
               ) : (isLoggedIn && user) ? (
                 <>
-                  <div className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "mr-6 text-sm flex items-center"
-                  )}>
-                    <User size={16} className="mr-2" />
-                    <span>{'User'}</span>
-                  </div>
+                  <Link
+                      className={cn(
+                        buttonVariants({ variant: "secondary" }),
+                        "mr-6 text-sm"
+                      )}
+                      href="/user"
+                    >
+                      User
+                    </Link>
                   {user.verifiedPolicy === "admin" && (
                     <Link
                       className={cn(

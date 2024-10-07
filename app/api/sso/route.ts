@@ -1,5 +1,6 @@
 import prisma from "@/app/lib/prisma";
-import { setConfig, Sso } from "littlefish-nft-auth-framework/backend";
+import { setConfig, Sso, convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
+import { Asset } from "littlefish-nft-auth-framework/frontend";
 import * as jose from "jose";
 
 const getConfig = () => ({
@@ -28,8 +29,10 @@ export async function POST(request: Request) {
 
   const issuer = process.env.ISSUER;
   const uniqueIdentifier = process.env.UNIQUE_IDENTIFIER;
+  console.log("stake_test1uqz3slthktsttndksu2r5wqvlz78urn0lc840vkzlm33vegq6def0" == "stake_test1uqz3slthktsttndksu2r5wqvlz78urn0lc840vkzlm33vegq6def0")
 
   let user;
+  let role;
 
   if (!issuer || !uniqueIdentifier) {
     return new Response(JSON.stringify({ error: "Issuer or Unique Identifier not set" }), {
@@ -41,14 +44,14 @@ export async function POST(request: Request) {
     where: {
       walletAddress: body.walletAddress,
     },
-    include: { assets: true, ssoData: true },
+    include: { assets: true, ssoData: true},
   });
   if (user) {
     const ssoData = user.ssoData;
     const count = ssoData[0].usageCount;
     const lastUsage = ssoData[0].lastUsed;
     const assetToSanitize = user.assets.find(
-      (matchingAsset) =>
+      (matchingAsset: Asset) =>
         matchingAsset.policyID === body.policyID &&
         matchingAsset.assetName === body.assetName
     );
@@ -73,6 +76,7 @@ export async function POST(request: Request) {
         status: 400,
       });
     }
+    role = ssoCheck.roles?.join(",")
     // if count is a number, update the usageCount in db
     if (count) {
       await prisma.sso.update({
@@ -109,7 +113,7 @@ export async function POST(request: Request) {
       issuerOption: issuer,
       platformUniqueIdentifier: uniqueIdentifier,
       usageCount: count,
-      lastUsage: lastUsage
+      lastUsage: lastUsage.toISOString()
   });
   
     if (!ssoCheck.success) {
@@ -118,11 +122,13 @@ export async function POST(request: Request) {
       });
     }
 
+    role = ssoCheck.roles?.join(",")
     user = await prisma.user.create({
       data: {
         walletAddress: body.walletAddress,
         walletNetwork: body.walletNetwork,
         walletAddressVerified: new Date(),
+        verifiedPolicy: ssoCheck.roles?.join(","),
         assets: {
           create: {
             policyID: body.policyID,
@@ -147,8 +153,14 @@ export async function POST(request: Request) {
 
   // Create and sign a new JWT
   const jwt = await new jose.SignJWT({
+    id: user.id,
     walletAddress: body.walletAddress,
     walletNetwork: body.walletNetwork,
+    policyID: body.policyID,
+    assetName: body.assetName,
+    amount: body.amount,
+    asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
+    verifiedPolicy: role,
   })
     .setProtectedHeader({ alg }) // Set the algorithm in the protected header
     .setIssuedAt() // Set the issued at time
