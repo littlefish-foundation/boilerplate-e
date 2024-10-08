@@ -29,7 +29,6 @@ export async function POST(request: Request) {
 
   const issuer = process.env.ISSUER;
   const uniqueIdentifier = process.env.UNIQUE_IDENTIFIER;
-  console.log("stake_test1uqz3slthktsttndksu2r5wqvlz78urn0lc840vkzlm33vegq6def0" == "stake_test1uqz3slthktsttndksu2r5wqvlz78urn0lc840vkzlm33vegq6def0")
 
   let user;
   let role;

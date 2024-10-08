@@ -25,7 +25,6 @@ export async function getMetadata(asset: Asset, networkID: number) {
     setConfig(networkConfig.apiKey, networkConfig.networkId);
     try {
         const [metadata, isSso] = await metadataReader(asset);
-        console.log("metadata", metadata);
         if (!metadata) {
             return new Response("Metadata not found", { status: 404 });
         }

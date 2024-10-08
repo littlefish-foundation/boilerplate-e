@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 interface Policy {
     id: string;
@@ -18,8 +19,7 @@ interface User {
     updatedAt: string;
     verifiedPolicy: string;
 }
-
-export default function SettingsPage() {
+export default function SettingsPage({ currentUserId }: { currentUserId: string }) {
     const [regularPolicy, setRegularPolicy] = useState<string>("");
     const [ssoPolicy, setSsoPolicy] = useState<string>("");
     const [message, setMessage] = useState<string>("");
@@ -27,6 +27,7 @@ export default function SettingsPage() {
     const [SsoPolicies, setSsoPolicies] = useState<Policy[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [strictPolicy, setStrictPolicy] = useState<boolean>(false);
+    const router = useRouter();
 
     useEffect(() => {
         fetchPolicies();
@@ -48,6 +49,10 @@ export default function SettingsPage() {
     }
 
     async function deleteUser(userId: string) {
+        if (!confirm("Are you sure you want to delete this user?")) {
+            return;
+        }
+
         try {
             const response = await fetch("/api/users", {
                 method: "DELETE",
@@ -55,8 +60,16 @@ export default function SettingsPage() {
                 body: JSON.stringify({ id: userId }),
             });
             if (!response.ok) throw new Error("Failed to delete user");
-            setMessage("User deleted successfully.");
-            fetchUsers();
+            const data = await response.json();
+            setMessage(data.message);
+            
+            if (userId === currentUserId) {
+                // If the deleted user is the current user, redirect to login
+                router.push('/login');
+            } else {
+                // Otherwise, just refresh the users list
+                fetchUsers();
+            }
         } catch (error) {
             setMessage("Failed to delete user.");
             console.error(error);

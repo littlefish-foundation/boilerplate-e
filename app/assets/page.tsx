@@ -5,7 +5,6 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 
 async function fetchMetadata(policyID: string, assetName: string): Promise<string> {
   const url = `https://cardano-mainnet.blockfrost.io/api/v0/assets/${policyID}${assetName}`;
-  console.log(process.env.MAINNET_API_KEY)
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -13,13 +12,11 @@ async function fetchMetadata(policyID: string, assetName: string): Promise<strin
       project_id: "mainnetymTzcAM0wcV5zvFl4kFp9mcCOZ3pAABm",  // Ensure the environment variable is set correctly
     },
   });
-  console.log(response);
 
   if (!response.ok) {
     throw new Error("Failed to fetch metadata");
   }
   const data = await response.json();
-  console.log(data.onchain_metadata.name);
   return data.metadata;
 }
 

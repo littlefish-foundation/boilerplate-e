@@ -148,7 +148,6 @@ export default function LoginPage() {
       setMessage({ type: "error", content: "Email login failed" });
     }
   }
-  console.log(ssoAssets)
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-black p-4">
