@@ -10,6 +10,13 @@ interface Policy {
     updatedAt: string;
 }
 
+interface Identifiers {
+    id: string;
+    identifier: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 interface User {
     id: string;
     email: string;
@@ -21,9 +28,11 @@ interface User {
 }
 export default function SettingsPage({ currentUserId }: { currentUserId: string }) {
     const [regularPolicy, setRegularPolicy] = useState<string>("");
+    const [regularIdentifier, setRegularIdentifier] = useState<string>("");
     const [ssoPolicy, setSsoPolicy] = useState<string>("");
     const [message, setMessage] = useState<string>("");
     const [policies, setPolicies] = useState<Policy[]>([]);
+    const [identifiers, setIdentifiers] = useState<Identifiers[]>([]);
     const [SsoPolicies, setSsoPolicies] = useState<Policy[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [strictPolicy, setStrictPolicy] = useState<boolean>(false);
@@ -34,6 +43,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
         fetchSsoPolicies();
         fetchUsers();
         fetchSettings();
+        fetchIdentifiers();
     }, []);
 
     async function fetchUsers() {
@@ -148,6 +158,34 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
         }
     }
 
+    async function registerIdentifier(identifier: string, endpoint: string) {
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ identifier }),
+            });
+            if (!response.ok) throw new Error(`Failed to register identifier at ${endpoint}`);
+            setMessage("identifier registered successfully.");
+            if (endpoint === "/api/identifer") fetchIdentifiers();
+        } catch (error) {
+            setMessage(`Failed to register identifier at ${endpoint}.`);
+            console.error(error);
+        }
+    }
+
+    async function fetchIdentifiers() {
+        try {
+            const response = await fetch("/api/identifier");
+            if (!response.ok) throw new Error("Failed to fetch identifiers");
+            const data: Identifiers[] = await response.json();
+            setIdentifiers(data);
+        } catch (error) {
+            setMessage("Error fetching Identifiers");
+            console.error(error);
+        }
+    }
+
     async function fetchSsoPolicies() {
         try {
             const response = await fetch("/api/ssoPolicy");
@@ -164,6 +202,12 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
         e.preventDefault();
         registerPolicy(regularPolicy, "/api/policy");
         setRegularPolicy(""); // Clear the input after submission
+    };
+
+    const handleSubmitRegularIdentifier = (e: React.FormEvent) => {
+        e.preventDefault();
+        registerIdentifier(regularIdentifier, "/api/identifier");
+        setRegularIdentifier(""); // Clear the input after submission
     };
 
     const handleSubmitSsoPolicy = (e: React.FormEvent) => {
@@ -207,6 +251,31 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         value={regularPolicy}
                         onChange={(e) => setRegularPolicy(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="mb-4">
+                    <button
+                        type="submit"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    >
+                        Register
+                    </button>
+                </div>
+            </form>
+
+            <h1 className="text-2xl font-bold mb-4">Register New Identifier</h1>
+            <form onSubmit={handleSubmitRegularIdentifier} className="w-full max-w-lg">
+                <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="regularPolicyID">
+                        Unique Identifier
+                    </label>
+                    <input
+                        type="text"
+                        id="regularPolicyID"
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        value={regularIdentifier}
+                        onChange={(e) => setRegularIdentifier(e.target.value)}
                         required
                     />
                 </div>
@@ -272,6 +341,21 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                     ))
                 ) : (
                     <li>No policies found</li>
+                )}
+            </ul>
+
+            <h2 className="text-xl font-bold mt-8">Unique Identifiers List</h2>
+            <ul>
+                {identifiers.length > 0 ? (
+                    identifiers.map((identifier) => (
+                        <li key={identifier.id} className="border-b border-gray-200 py-2">
+                            <p><strong>Unique Identifier:</strong> {identifier.identifier}</p>
+                            <p><strong>Created At:</strong> {new Date(identifier.createdAt).toLocaleString()}</p>
+                            <p><strong>Updated At:</strong> {new Date(identifier.updatedAt).toLocaleString()}</p>
+                        </li>
+                    ))
+                ) : (
+                    <li>No Identifiers found</li>
                 )}
             </ul>
             

@@ -28,12 +28,13 @@ export async function POST(request: Request) {
     setConfig(networkConfig.apiKey, networkConfig.networkId);
 
   const issuer = process.env.ISSUER;
-  const uniqueIdentifier = process.env.UNIQUE_IDENTIFIER;
+  const uniqueIdentifiers = await prisma.identifiers.findMany({
+  });
 
   let user;
   let role;
 
-  if (!issuer || !uniqueIdentifier) {
+  if (!issuer || !uniqueIdentifiers) {
     return new Response(JSON.stringify({ error: "Issuer or Unique Identifier not set" }), {
       status: 400,
     });
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       nonce: body.nonce,
       asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
       issuerOption: issuer,
-      platformUniqueIdentifier: uniqueIdentifier,
+      platformUniqueIdentifiers: uniqueIdentifiers.map((identifier) => identifier.identifier),
   });
     if (!ssoCheck.success) {
       return new Response(JSON.stringify({ error: ssoCheck.error }), {
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       nonce: body.nonce,
       asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
       issuerOption: issuer,
-      platformUniqueIdentifier: uniqueIdentifier,
+      platformUniqueIdentifiers: uniqueIdentifiers.map((identifier) => identifier.identifier),
       usageCount: count,
       lastUsage: lastUsage.toISOString()
   });
