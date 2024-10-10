@@ -55,6 +55,7 @@ export default function SignupPage() {
   const [activeTab, setActiveTab] = useState("email");
   const [ssoAssets, setSSOAssets] = useState<Asset[]>([]);
   const [nonSsoAssets, setNonSsoAssets] = useState<Asset[]>([]);
+  const [isRequestingToken, setIsRequestingToken] = useState(false);
 
   useEffect(() => {
     if (assets.length > 0) {
@@ -159,7 +160,7 @@ export default function SignupPage() {
       }
     }
   }
-
+  
   async function handleEmailSignup(e: React.FormEvent) {
     e.preventDefault();
     try {
@@ -173,6 +174,43 @@ export default function SignupPage() {
     } catch (error) {
       console.error("Email signup failed:", error);
       setMessage({ type: "error", content: "Email signup failed" });
+    }
+  }
+
+  async function handleRequestToken() {
+    if (!isConnected || !addresses[0]) {
+      setMessage({ type: "error", content: "Please connect your wallet first" });
+      return;
+    }
+
+    setIsRequestingToken(true);
+    setMessage({ type: "", content: "" });
+
+    const formData = {
+      walletNetwork: networkID,
+      stakeAddress: addresses[0],
+    };
+
+    try {
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to request token');
+      }
+
+      const data = await response.json();
+      setMessage({ type: "success", content: "Token request successful. You will receive the token in less than 24 hours, check your wallet." });
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage({ type: "error", content: "Failed to request token. Please try again." });
+    } finally {
+      setIsRequestingToken(false);
     }
   }
 
@@ -300,6 +338,13 @@ export default function SignupPage() {
                       ))}
                     </div>
                   )}
+                  <Button
+                    onClick={handleRequestToken}
+                    className="w-full"
+                    disabled={!isConnected || isRequestingToken}
+                  >
+                    {isRequestingToken ? "Requesting..." : "Request a Demo Token"}
+                  </Button>
                 </div>
               </TabsContent>
             </Tabs>
