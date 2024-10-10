@@ -340,7 +340,7 @@ export default function LoginPage() {
                     className="w-full"
                     disabled={!isConnected || isRequestingToken}
                   >
-                    {isRequestingToken ? "Requesting..." : "Request a Demo Token"}
+                    {isRequestingToken ? "Requesting..." : "Request a Demo Token(Preprod only)"}
                   </Button>
                 </div>
               </TabsContent>
