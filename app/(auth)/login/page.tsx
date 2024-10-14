@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Mail, Wallet, ChevronLeft } from "lucide-react";
+import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
 
 interface Policy {
   id: string;
@@ -184,7 +185,7 @@ export default function LoginPage() {
 
     const formData = {
       walletNetwork: networkID,
-      stakeAddress: addresses[0],
+      stakeAddress: convertHexToBech32(addresses[0], 0),
     };
 
     try {

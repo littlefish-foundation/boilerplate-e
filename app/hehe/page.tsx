@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { convertHexToBech32 } from 'littlefish-nft-auth-framework/backend'
 
 const Test = async () => {
   const asset = "9b80f2ad359fcc76802228b0cac920ce41e30b50edf86a79658597c74c6974746c6546697368417574684e4654303031"
@@ -42,6 +43,7 @@ const SessionChecker = () => {
   if (loading) {
     return <div className='mt-16'>Loading...</div>
   }
+  console.log(convertHexToBech32("e0a59e8cd2e3caa010782b28316b32d8aa4492f28b1788ab7861a14576", 0))
 
   if (!user) {
     return (
