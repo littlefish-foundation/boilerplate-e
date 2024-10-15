@@ -148,7 +148,7 @@ const SsoDataBox = ({ data, user }: { data: any; user: any }) => (
                     <p className="text-gray-700 font-bold">Roles:</p>
                     <p className="text-gray-600">{user.verifiedPolicy}</p>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -159,18 +159,18 @@ const checkInactivityPeriod = (lastUsed: string, inactivityPeriod: string): bool
     const lastUsedDate = new Date(lastUsed);
     const [value, unit] = inactivityPeriod.match(/(\d+)([dmy])/)?.slice(1) ?? ['0', 'd'];
     const numericValue = parseInt(value, 10);
-  
+
     switch (unit) {
-      case 'd':
-        return differenceInDays(now, lastUsedDate) <= numericValue;
-      case 'm':
-        return differenceInMonths(now, lastUsedDate) <= numericValue;
-      case 'y':
-        return differenceInYears(now, lastUsedDate) <= numericValue;
-      default:
-        return false;
+        case 'd':
+            return differenceInDays(now, lastUsedDate) <= numericValue;
+        case 'm':
+            return differenceInMonths(now, lastUsedDate) <= numericValue;
+        case 'y':
+            return differenceInYears(now, lastUsedDate) <= numericValue;
+        default:
+            return false;
     }
-  };
+};
 
 export default async function UserPage() {
     const cookieStore = cookies()
@@ -220,11 +220,11 @@ export default async function UserPage() {
                         <SsoDataBox key="Person 1 Information" data={user.ssoData[0]} user={user} />
                     </div>
                     <div className="w-full md:w-1/2">
-                        <MetadataBox 
-                            key="Person 2 Information" 
-                            data={metadata[0]} 
-                            user={user} 
-                            ssoData={{...user.ssoData[0], lastUsed: user.ssoData[0].lastUsed?.toISOString() || ''}}
+                        <MetadataBox
+                            key="Person 2 Information"
+                            data={metadata[0]}
+                            user={user}
+                            ssoData={{ ...user.ssoData[0], lastUsed: user.ssoData[0].lastUsed?.toISOString() || '' }}
                         />
                     </div>
                 </div>

@@ -1,5 +1,9 @@
 import prisma from "@/app/lib/prisma";
-import { setConfig, Sso, convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
+import {
+  setConfig,
+  Sso,
+  convertHexToBech32,
+} from "littlefish-nft-auth-framework/backend";
 import { Asset } from "littlefish-nft-auth-framework/frontend";
 import * as jose from "jose";
 
@@ -21,35 +25,48 @@ export async function POST(request: Request) {
   // Parse the incoming JSON request body
   const body = await request.json();
   const config = getConfig();
-    const networkConfig = config[body.walletNetwork as keyof typeof config];
-    if (!networkConfig || !networkConfig.apiKey) {
-      return new Response(JSON.stringify({ error: "Invalid network configuration" }), { status: 400 });
-    }
-    setConfig(networkConfig.apiKey, networkConfig.networkId);
+  const networkConfig = config[body.walletNetwork as keyof typeof config];
+  if (!networkConfig || !networkConfig.apiKey) {
+    return new Response(
+      JSON.stringify({ error: "Invalid network configuration" }),
+      { status: 400 }
+    );
+  }
+  setConfig(networkConfig.apiKey, networkConfig.networkId);
 
   const issuer = process.env.ISSUER;
-  const uniqueIdentifiers = await prisma.identifiers.findMany({
-  });
+  const uniqueIdentifiers = await prisma.identifiers.findMany({});
 
   let user;
   let role;
 
   if (!issuer || !uniqueIdentifiers) {
-    return new Response(JSON.stringify({ error: "Issuer or Unique Identifier not set" }), {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Issuer or Unique Identifier not set" }),
+      {
+        status: 400,
+      }
+    );
   }
 
   user = await prisma.user.findFirst({
     where: {
       walletAddress: body.walletAddress,
     },
-    include: { assets: true, ssoData: true},
+    include: { assets: true, ssoData: true },
   });
   if (user) {
     const ssoData = user.ssoData;
-    const count = ssoData[0].usageCount;
-    const lastUsage = ssoData[0].lastUsed;
+    let count;
+    count = ssoData[0].usageCount;
+    if (!count) {
+      count = 0;
+    }
+    let lastUsage;
+    lastUsage = ssoData[0].lastUsed;
+    if (!lastUsage) {
+      lastUsage = new Date();
+    }
     const assetToSanitize = user.assets.find(
       (matchingAsset: Asset) =>
         matchingAsset.policyID === body.policyID &&
@@ -67,16 +84,25 @@ export async function POST(request: Request) {
       signature: body.signature,
       key: body.key,
       nonce: body.nonce,
-      asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
+      asset: {
+        policyID: body.policyID,
+        assetName: body.assetName,
+        amount: body.amount,
+      },
       issuerOption: issuer,
-      platformUniqueIdentifiers: uniqueIdentifiers.map((identifier) => identifier.identifier),
-  });
+      platformUniqueIdentifiers: uniqueIdentifiers.map(
+        (identifier) => identifier.identifier
+      ),
+      usageCount: count,
+      lastUsage: lastUsage.toISOString(),
+    });
+    console.log(ssoCheck)
     if (!ssoCheck.success) {
       return new Response(JSON.stringify({ error: ssoCheck.error }), {
         status: 400,
       });
     }
-    role = ssoCheck.roles?.join(",")
+    role = ssoCheck.roles?.join(",");
     // if count is a number, update the usageCount in db
     if (count) {
       await prisma.sso.update({
@@ -109,20 +135,26 @@ export async function POST(request: Request) {
       signature: body.signature,
       key: body.key,
       nonce: body.nonce,
-      asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
+      asset: {
+        policyID: body.policyID,
+        assetName: body.assetName,
+        amount: body.amount,
+      },
       issuerOption: issuer,
-      platformUniqueIdentifiers: uniqueIdentifiers.map((identifier) => identifier.identifier),
+      platformUniqueIdentifiers: uniqueIdentifiers.map(
+        (identifier) => identifier.identifier
+      ),
       usageCount: count,
-      lastUsage: lastUsage.toISOString()
-  });
-  
+      lastUsage: lastUsage.toISOString(),
+    });
+
     if (!ssoCheck.success) {
       return new Response(JSON.stringify({ error: ssoCheck.error }), {
         status: 400,
       });
     }
 
-    role = ssoCheck.roles?.join(",")
+    role = ssoCheck.roles?.join(",");
     user = await prisma.user.create({
       data: {
         walletAddress: body.walletAddress,
@@ -147,7 +179,7 @@ export async function POST(request: Request) {
       },
     });
   }
-  
+
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
   const alg = "HS256";
 
@@ -159,7 +191,11 @@ export async function POST(request: Request) {
     policyID: body.policyID,
     assetName: body.assetName,
     amount: body.amount,
-    asset: {"policyID": body.policyID, "assetName": body.assetName, "amount": body.amount},
+    asset: {
+      policyID: body.policyID,
+      assetName: body.assetName,
+      amount: body.amount,
+    },
     verifiedPolicy: role,
   })
     .setProtectedHeader({ alg }) // Set the algorithm in the protected header
@@ -169,5 +205,8 @@ export async function POST(request: Request) {
     .setExpirationTime("2h") // Set the expiration time to 2 hours
     .sign(secret); // Sign the JWT with the secret
   // Return a 200 response indicating success
-  return new Response(JSON.stringify({ token: jwt }), { status: 200, headers: { "Content-Type": "application/json" } });
+  return new Response(JSON.stringify({ token: jwt }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }
