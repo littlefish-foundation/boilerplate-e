@@ -311,29 +311,35 @@ export default function LoginPage() {
                   {isConnected && decodedAssets.length > 0 && (
                     <div className="space-y-2">
                       <Label>Login with Asset</Label>
-                      {nonSsoAssets.map((asset, index) => (
-                        <Button
-                          key={index}
-                          onClick={() => handleCardanoLogin(false, assets[index] as Asset)}
-                          className="w-full mb-2"
-                        >
-                          {asset.assetName}
-                        </Button>
-                      ))}
+                      {nonSsoAssets.map((asset, index) => {
+                        const assetIndex = assets.findIndex(a => a.policyID === asset.policyID && a.assetName === asset.assetName);
+                        return (
+                          <Button
+                            key={asset.policyID + asset.assetName}
+                            onClick={() => handleCardanoLogin(false, asset)}
+                            className="w-full mb-2"
+                          >
+                            {assetIndex !== -1 ? decodedAssets[assetIndex].assetName : asset.assetName}
+                          </Button>
+                        );
+                      })}
                     </div>
                   )}
                   {isConnected && ssoAssets.length > 0 && (
                     <div className="space-y-2">
                       <Label>SSO</Label>
-                      {ssoAssets.map((asset, index) => (
-                        <Button
-                          key={index}
-                          onClick={() => handleCardanoLogin(true, ssoAssets[index] as Asset)}
-                          className="w-full mb-2"
-                        >
-                          {asset.assetName}
-                        </Button>
-                      ))}
+                      {ssoAssets.map((asset, index) => {
+                        const assetIndex = assets.findIndex(a => a.policyID === asset.policyID && a.assetName === asset.assetName);
+                        return (
+                          <Button
+                            key={asset.policyID + asset.assetName}
+                            onClick={() => handleCardanoLogin(true, asset)}
+                            className="w-full mb-2"
+                          >
+                            {assetIndex !== -1 ? decodedAssets[assetIndex].assetName : asset.assetName}
+                          </Button>
+                        );
+                      })}
                     </div>
                   )}
                   <Button
