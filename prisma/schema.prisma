@@ -24,7 +24,7 @@ model User {
   walletAddress         String?   @unique
   walletAddressVerified DateTime?
   walletNetwork         Int?
-  verifiedPolicy        String?
+  roles                 String[]
   ssoData               Sso[]
   assets                Asset[]
   accounts              Account[]

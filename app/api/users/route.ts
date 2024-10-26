@@ -54,11 +54,11 @@ export async function POST(request: Request) {
 
     // Update the user verifiedPolicy
     const verifiedPolicy = "admin";
-    if (user.verifiedPolicy === verifiedPolicy) {
+    if (user.roles.includes(verifiedPolicy)) {
         try {
             const updatedUser = await prisma.user.update({
                 where: { id: user.id },
-                data: { verifiedPolicy: null },
+                data: { roles: [] },
             });
             return new Response(JSON.stringify(updatedUser), {
                 status: 200,
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         try {
             const updatedUser = await prisma.user.update({
                 where: { id: user.id },
-                data: { verifiedPolicy },
+                data: { roles: ["admin"] },
             });
             return new Response(JSON.stringify(updatedUser), {
                 status: 200,

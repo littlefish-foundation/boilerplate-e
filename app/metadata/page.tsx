@@ -43,7 +43,7 @@ interface MetadataBoxProps {
         tiedWallet: string;
         issuanceDate: string;
         expirationDate: string;
-        role: string;
+        role: string[];
     };
     user: {
         assets: Array<{ policyID: string }>;
@@ -100,7 +100,7 @@ const MetadataBox: React.FC<MetadataBoxProps> = ({ data, user, ssoData }) => (
                 </div>
                 <div className="py-4">
                     <p className="text-gray-700 font-bold">Roles:</p>
-                    <p className="text-gray-600">{data.role}</p>
+                    <p className="text-gray-600">{data.role.join(",")}</p>
                 </div>
                 <div className="py-4">
                     <p className="text-gray-700 font-bold">Inactivity Period:</p>
@@ -146,7 +146,7 @@ const SsoDataBox = ({ data, user }: { data: any; user: any }) => (
                 </div>
                 <div className="py-4">
                     <p className="text-gray-700 font-bold">Roles:</p>
-                    <p className="text-gray-600">{user.verifiedPolicy}</p>
+                    <p className="text-gray-600">{user.roles.join(",")}</p>
                 </div>
 
             </div>

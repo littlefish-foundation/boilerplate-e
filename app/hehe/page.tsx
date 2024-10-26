@@ -43,7 +43,6 @@ const SessionChecker = () => {
   if (loading) {
     return <div className='mt-16'>Loading...</div>
   }
-  console.log(convertHexToBech32("e0a59e8cd2e3caa010782b28316b32d8aa4492f28b1788ab7861a14576", 0))
 
   if (!user) {
     return (
@@ -64,7 +63,7 @@ const SessionChecker = () => {
     <div className='mt-16'>
       <p>Logged in as {user.walletAddress || user.email}</p>
       {user.walletNetwork && <p>Wallet Network: {user.walletNetwork}</p>}
-      {user.verifiedPolicy && <p>Verified Policy: {user.verifiedPolicy}</p>}
+      {user.roles && <p>Roles: {user.roles.join(", ")}</p>}
     </div>
   )
 }

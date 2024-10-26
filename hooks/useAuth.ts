@@ -4,7 +4,7 @@ interface User {
   walletAddress?: string
   email?: string
   walletNetwork?: number
-  verifiedPolicy?: string
+  roles?: string[]
 }
 
 export function useAuth() {

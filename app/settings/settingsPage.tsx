@@ -24,7 +24,7 @@ interface User {
     walletNetwork: number;
     createdAt: string;
     updatedAt: string;
-    verifiedPolicy: string;
+    roles: string[];
 }
 export default function SettingsPage({ currentUserId }: { currentUserId: string }) {
     const [regularPolicy, setRegularPolicy] = useState<string>("");
@@ -373,7 +373,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                                     <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
                                 </>
                             )}
-                            <p><strong>Role:</strong> {user.verifiedPolicy}</p>
+                            <p><strong>Role:</strong> {user.roles.join(", ")}</p>
                             <button
                                 onClick={() => deleteUser(user.id)}
                                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
@@ -383,10 +383,10 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                             <button
                                 onClick={() => updateUserRole(user.id)}
                                 className={`${
-                                    user.verifiedPolicy === "admin" ? "bg-purple-500 hover:bg-purple-700" : "bg-green-500 hover:bg-green-700"
+                                    user.roles.includes("admin") ? "bg-purple-500 hover:bg-purple-700" : "bg-green-500 hover:bg-green-700"
                                 } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
                             >
-                                {user.verifiedPolicy === "admin" ? "Remove Admin Role" : "Give Admin Role"}
+                                {user.roles.includes("admin") ? "Remove Admin Role" : "Give Admin Role"}
                             </button>
                         </li>
                     ))

@@ -29,10 +29,10 @@ export default async function Page() {
     walletAddress: payload.walletAddress,
     email: payload.email,
     walletNetwork: payload.walletNetwork,
-    verifiedPolicy: payload.verifiedPolicy,
+    roles: payload.roles,
   }
 
-  if ("admin" !== userData.verifiedPolicy) {
+  if (!userData.roles.includes("admin")) {
     redirect('/')
   }
   

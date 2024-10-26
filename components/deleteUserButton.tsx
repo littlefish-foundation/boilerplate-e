@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 interface User {
   id: string;
   walletAddress: string;
-  verifiedPolicy: string;
+  roles: string[];
   createdAt: Date;
   // Add other fields as needed
 }
@@ -50,7 +50,7 @@ export default function DeleteUserButton({ user }: { user: User }) {
     return (
         <div>
             <p>Wallet Address: {user.walletAddress}</p>
-            <p>Verified Policy: {user.verifiedPolicy}</p>
+            <p>Roles: {user.roles.join(", ")}</p>
             <p>Created At: {new Date(user.createdAt).toLocaleString()}</p>
             <button
                 onClick={handleDelete}

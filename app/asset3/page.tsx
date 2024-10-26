@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import * as jose from 'jose'
 import { redirect } from 'next/navigation'
 import { NextResponse } from 'next/server'
-import TokenGatedDemoPage from './asset2page'
+import TokenGatedDemoPage from './asset3page'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
@@ -52,7 +52,7 @@ export default async function Page() {
     roles: payload.roles as string[],
   }
 
-  if (!userData.roles.includes(data[1].policyID)) {
+  if (!userData.roles.includes("anan")) {
     redirect('/')
   }
   return (

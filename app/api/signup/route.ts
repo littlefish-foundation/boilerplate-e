@@ -105,7 +105,7 @@ export async function POST(request: Request) {
             walletAddress: result.stakeAddress,
             walletNetwork: result.walletNetwork,
             walletAddressVerified: new Date(),
-            verifiedPolicy: result.verifiedPolicy,
+            roles: [result.asset.policyID],
             assets: {
               create: {
                 policyID: result.asset.policyID,

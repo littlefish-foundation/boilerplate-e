@@ -140,7 +140,7 @@ export function SiteHeader() {
                     >
                       User
                     </Link>
-                  {user.verifiedPolicy === "admin" && (
+                  {user.roles && user.roles.includes("admin") && (
                     <Link
                       className={cn(
                         buttonVariants({ variant: "secondary" }),

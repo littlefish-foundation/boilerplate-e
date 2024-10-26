@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   // Parse the incoming JSON request body
   const body = await request.json();
   let user: UserWithAssets | null; // Declare a variable to store the user details
-  let verifiedPolicy: String;
+  let roles: String[];
 
   // Destructure relevant fields from the request body
   const {
@@ -49,13 +49,13 @@ export async function POST(request: Request) {
 
   if (email && password) {
     // If email and password are provided, attempt to login with email and password
-    verifiedPolicy = "null";
+    roles = [];
     user = await prisma.user.findFirst({
       where: { email },
       include: { assets: true },
     });
-    if (user?.verifiedPolicy === "admin") {
-      verifiedPolicy = "admin";
+    if (user?.roles.includes("admin")) {
+      roles.push("admin");
     }
 
     // If the user does not exist, return a 404 response
@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     }
     setConfig(networkConfig.apiKey, networkConfig.networkId);
     // If wallet details are provided, attempt to login with wallet details
-    verifiedPolicy = "null";
+    roles = [];
     user = await prisma.user.findFirst({
       where: { walletAddress },
       include: { assets: true },
@@ -97,15 +97,15 @@ export async function POST(request: Request) {
     if (policyID && assetName && amount) {
       const asset = { policyID, assetName, amount };
       const verifiedPolicies = await prisma.policy.findMany();
-      if (user.verifiedPolicy !== "admin") {
+      if (user.roles.includes("admin")) {
+        roles.push("admin");
+      }
+      if (!user.roles.includes("admin")) {
         if (verifiedPolicies.some((policy) => policy.policyID === asset.policyID)) {
-          verifiedPolicy = asset.policyID;
+          roles.push(asset.policyID);
         }
       }
-      if (user.verifiedPolicy === "admin") {
-        verifiedPolicy = "admin";
-      }
-
+    
       const assetToSanitize = user.assets.find((matchingAsset) => matchingAsset.policyID === asset.policyID && matchingAsset.assetName === asset.assetName);
       if (!assetToSanitize) {
         throw new Error("No asset found for this user");
@@ -143,8 +143,8 @@ export async function POST(request: Request) {
         walletNetwork: user.walletNetwork as number,
       };
 
-      if (user.verifiedPolicy === "admin") {
-        verifiedPolicy = "admin";
+      if (user.roles.includes("admin")) {
+        roles.push("admin");
       }
       const isValid = await loginUser(sanitizedUser, {
         stakeAddress: walletAddress,
@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     walletAddress: user.walletAddress,
     email: user.email,
     walletNetwork: user.walletNetwork,
-    verifiedPolicy: verifiedPolicy
+    roles: roles
   })
     .setProtectedHeader({ alg }) // Set the algorithm in the protected header
     .setIssuedAt() // Set the issued at time

@@ -44,7 +44,7 @@ export async function GET(request: Request) {
             walletAddress: payload.walletAddress,
             email: payload.email,
             walletNetwork: payload.walletNetwork,
-            verifiedPolicy: payload.verifiedPolicy,
+            roles: payload.roles,
         })
     } catch (error) {
         return Response.json({ error: 'Invalid token' }, { status: 401 })

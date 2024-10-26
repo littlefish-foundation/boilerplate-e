@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   const uniqueIdentifiers = await prisma.identifiers.findMany({});
 
   let user;
-  let role;
+  let roles: string[];
 
   if (!issuer || !uniqueIdentifiers) {
     return new Response(
@@ -96,13 +96,13 @@ export async function POST(request: Request) {
       usageCount: count,
       lastUsage: lastUsage.toISOString(),
     });
-    console.log(ssoCheck)
+    
     if (!ssoCheck.success) {
       return new Response(JSON.stringify({ error: ssoCheck.error }), {
         status: 400,
       });
     }
-    role = ssoCheck.roles?.join(",");
+    roles = ssoCheck.roles || [];
     // if count is a number, update the usageCount in db
     if (count) {
       await prisma.sso.update({
@@ -154,13 +154,13 @@ export async function POST(request: Request) {
       });
     }
 
-    role = ssoCheck.roles?.join(",");
+    roles = ssoCheck.roles || [];
     user = await prisma.user.create({
       data: {
         walletAddress: body.walletAddress,
         walletNetwork: body.walletNetwork,
         walletAddressVerified: new Date(),
-        verifiedPolicy: ssoCheck.roles?.join(","),
+        roles: roles, // Store as array
         assets: {
           create: {
             policyID: body.policyID,
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
       assetName: body.assetName,
       amount: body.amount,
     },
-    verifiedPolicy: role,
+    roles: roles, // Store as array
   })
     .setProtectedHeader({ alg }) // Set the algorithm in the protected header
     .setIssuedAt() // Set the issued at time
