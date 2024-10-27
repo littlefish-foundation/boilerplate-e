@@ -61,8 +61,8 @@ export default async function UserPage() {
                     <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
                 </>
             )}
-            <p><strong>Role:</strong> {user.verifiedPolicy || 'Not verified'}</p>
-            <DeleteUserButton user={{...user, verifiedPolicy: user.verifiedPolicy || '', walletAddress: user.walletAddress || ''}} />
+            <p><strong>Role:</strong> {user.roles || 'Not verified'}</p>
+            <DeleteUserButton user={{...user, roles: user.roles || '', walletAddress: user.walletAddress || ''}} />
         </li>
     </div>
     )
