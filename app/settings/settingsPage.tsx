@@ -72,7 +72,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
             if (!response.ok) throw new Error("Failed to delete user");
             const data = await response.json();
             setMessage(data.message);
-            
+
             if (userId === currentUserId) {
                 // If the deleted user is the current user, redirect to login
                 router.push('/login');
@@ -223,8 +223,9 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 mt-16">
             <h1 className="text-2xl font-bold mb-4">Settings</h1>
+            <p className="text-red-800 text-lg font-extrabold mb-2">This page is only accessible to users with the admin role.</p>
             <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="strictPolicy">
                     Strict Policy
@@ -238,7 +239,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                 />
             </div>
             {message && <p className="text-red-500 text-xs italic mb-4">{message}</p>}
-            
+
             <h1 className="text-2xl font-bold mb-4">Register New Policy</h1>
             <form onSubmit={handleSubmitRegularPolicy} className="w-full max-w-lg">
                 <div className="mb-4">
@@ -288,7 +289,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                     </button>
                 </div>
             </form>
-            
+
             <h1 className="text-2xl font-bold mb-4">Register New SSO Policy</h1>
             <form onSubmit={handleSubmitSsoPolicy} className="w-full max-w-lg">
                 <div className="mb-4">
@@ -313,7 +314,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                     </button>
                 </div>
             </form>
-            
+
             <h2 className="text-xl font-bold mt-8">Policies List</h2>
             <ul>
                 {policies.length > 0 ? (
@@ -358,7 +359,7 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                     <li>No Identifiers found</li>
                 )}
             </ul>
-            
+
             <h2 className="text-xl font-bold mt-8">Users List</h2>
             <ul>
                 {users.length > 0 ? (
@@ -382,9 +383,8 @@ export default function SettingsPage({ currentUserId }: { currentUserId: string 
                             </button>
                             <button
                                 onClick={() => updateUserRole(user.id)}
-                                className={`${
-                                    user.roles.includes("admin") ? "bg-purple-500 hover:bg-purple-700" : "bg-green-500 hover:bg-green-700"
-                                } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
+                                className={`${user.roles.includes("admin") ? "bg-purple-500 hover:bg-purple-700" : "bg-green-500 hover:bg-green-700"
+                                    } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
                             >
                                 {user.roles.includes("admin") ? "Remove Admin Role" : "Give Admin Role"}
                             </button>

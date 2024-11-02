@@ -27,10 +27,10 @@ export default function TokenGatedDemoPage() {
 
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
-            Welcome to the Littefish Token Access Demo
+            Welcome to the Littefish SSO Access Demo
           </h1>
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-400">
-            This page is only accessible to holders of ADA Handle.
+            This page is only accessible to users with the reviewer role.
           </p>
         </div>
 

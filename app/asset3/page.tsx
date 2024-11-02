@@ -52,7 +52,7 @@ export default async function Page() {
     roles: payload.roles as string[],
   }
 
-  if (!userData.roles.includes("anan")) {
+  if (!userData.roles.includes("reviewer")) {
     redirect('/')
   }
   return (
