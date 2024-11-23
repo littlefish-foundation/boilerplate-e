@@ -63,6 +63,9 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
       console.error("Failed to sign message");
       return;
     }
+    console.log("nonce: ", nonce);
+    console.log("walletAddress: ", walletAddress);
+    console.log("signResponse: ", signResponse);
     return signResponse;
   } catch (error) {
     console.error("Error signing message:", error);
