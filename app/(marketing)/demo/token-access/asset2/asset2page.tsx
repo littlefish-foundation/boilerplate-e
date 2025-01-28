@@ -18,9 +18,7 @@ const FeatureCard = ({ title, description, icon: Icon }: { title: string, descri
 
 export default function TokenGatedDemoPage({ policies }: { policies: Policy[] }) {
   const { assets } = useWallet()
-  console.log("dilek", assets)
   const hasAccess = policies.find(policy => assets.find(asset => asset.policyID === policy.policyID))
-  console.log("emir", hasAccess)
 
   if (!hasAccess) {
     redirect('/demo/token-access')

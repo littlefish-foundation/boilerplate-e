@@ -85,6 +85,8 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     amount: asset.amount,
   });
 
+  console.log(requestBody)
+
   let response;
   if (sso) {
     response = await fetch(`${process.env.ROOT_URL}/api/sso`, {
