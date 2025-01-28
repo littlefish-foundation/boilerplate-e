@@ -1,7 +1,7 @@
 "use server"
 import { cookies } from "next/headers";
 import { redirect } from 'next/navigation'
-import prisma from "../lib/prisma";
+import prisma from "../../../lib/prisma";
 import * as jose from 'jose';
 import { convertHexToBech32, metadataReader, setConfig } from 'littlefish-nft-auth-framework/backend';
 import { differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
@@ -199,11 +199,7 @@ export default async function UserPage() {
     );
 
     if (user?.email) {
-        return (
-            <div>
-                <h1>{user?.email}</h1>
-            </div>
-        );
+        redirect('/demo')
     }
     if (user?.walletAddress) {
         const config = getConfig();
