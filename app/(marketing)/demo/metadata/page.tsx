@@ -175,14 +175,17 @@ const checkInactivityPeriod = (lastUsed: string, inactivityPeriod: string): bool
 export default async function UserPage() {
     const cookieStore = cookies()
     const token = cookieStore.get('auth-token')
+    
     if (!token) {
         redirect('/')
     }
+
     const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
     let payload;
     try {
         ({ payload } = await jose.jwtVerify(token.value, JWT_SECRET))
     } catch (error) {
+        console.error('JWT Verification error:', error);
         redirect('/')
     }
 
@@ -203,28 +206,64 @@ export default async function UserPage() {
     }
     if (user?.walletAddress) {
         const config = getConfig();
-        const networkConfig = config[0 as keyof typeof config];
+        const networkConfig = config[payload.walletNetwork as keyof typeof config];
+
         if (!networkConfig || !networkConfig.apiKey) {
             return new Response(JSON.stringify({ error: "Invalid network configuration" }), { status: 400 });
         }
+
         setConfig(networkConfig.apiKey, networkConfig.networkId);
-        const metadata = await metadataReader(user.assets[0])
-        return (
-            <div className="container mx-auto px-4 mt-16">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="w-full md:w-1/2">
-                        <SsoDataBox key="Person 1 Information" data={user.ssoData[0]} user={user} />
+        
+        try {
+            const [metadata, isSso] = await metadataReader(user.assets[0]);
+
+            if (!isSso) {
+                return (
+                    <div className="container mx-auto px-4 mt-16">
+                        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">
+                            <strong className="font-bold">Notice: </strong>
+                            <span className="block sm:inline">
+                                This NFT does not contain SSO metadata. Please ensure you're using an NFT with SSO capabilities.
+                            </span>
+                        </div>
                     </div>
-                    <div className="w-full md:w-1/2">
-                        <MetadataBox
-                            key="Person 2 Information"
-                            data={metadata[0]}
-                            user={user}
-                            ssoData={{ ...user.ssoData[0], lastUsed: user.ssoData[0].lastUsed?.toISOString() || '' }}
-                        />
+                );
+            }
+
+            return (
+                <div className="container mx-auto px-4 mt-16">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        {user.ssoData && user.ssoData[0] && (
+                            <div className="w-full md:w-1/2">
+                                <SsoDataBox key="Person 1 Information" data={user.ssoData[0]} user={user} />
+                            </div>
+                        )}
+                        <div className="w-full md:w-1/2">
+                            <MetadataBox
+                                key="Person 2 Information"
+                                data={metadata}
+                                user={user}
+                                ssoData={{ 
+                                    ...user.ssoData?.[0], 
+                                    lastUsed: user.ssoData?.[0]?.lastUsed?.toISOString() || new Date().toISOString() 
+                                }}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        } catch (error) {
+            console.error('Metadata reader error:', error);
+            return (
+                <div className="container mx-auto px-4 mt-16">
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Error: </strong>
+                        <span className="block sm:inline">
+                            Failed to load metadata. Please ensure your NFT exists on {networkConfig.networkId}.
+                        </span>
+                    </div>
+                </div>
+            );
+        }
     }
 }
