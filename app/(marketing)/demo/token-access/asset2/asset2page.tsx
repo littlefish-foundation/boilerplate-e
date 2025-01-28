@@ -2,6 +2,9 @@
 import React from 'react';
 import { FiLock, FiCoffee, FiDownload, FiGift, FiArrowLeft } from 'react-icons/fi';
 import Link from 'next/link';
+import { Policy } from '@prisma/client';
+import { useWallet } from 'littlefish-nft-auth-framework';
+import { redirect } from 'next/navigation';
 
 const FeatureCard = ({ title, description, icon: Icon }: { title: string, description: string, icon: React.ElementType }) => (
   <div className="bg-gray-800 rounded-lg shadow-md p-6">
@@ -13,7 +16,15 @@ const FeatureCard = ({ title, description, icon: Icon }: { title: string, descri
   </div>
 );
 
-export default function TokenGatedDemoPage() {
+export default function TokenGatedDemoPage({ policies }: { policies: Policy[] }) {
+  const { assets } = useWallet()
+  console.log("dilek", assets)
+  const hasAccess = policies.find(policy => assets.find(asset => asset.policyID === policy.policyID))
+  console.log("emir", hasAccess)
+
+  if (!hasAccess) {
+    redirect('/demo/token-access')
+  }
 
   return (
     <div className="min-h-screen bg-black py-12 px-4 sm:px-6 lg:px-8 mt-12">
@@ -35,12 +46,12 @@ export default function TokenGatedDemoPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <FeatureCard 
+          <FeatureCard
             icon={FiCoffee}
             title="Exclusive Content"
             description="Access for token holders only. You can gate different pages based on the user's token collection."
           />
-          <FeatureCard 
+          <FeatureCard
             icon={FiLock}
             title="Secure Access"
             description="Your exclusive access is secured by blockchain technology."

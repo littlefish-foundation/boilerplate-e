@@ -23,28 +23,8 @@ const menuItem = [
   {
     id: 1,
     label: "Framework Demo",
-    href: "/assets",
-  },
-  {
-    id: 2,
-    label: "ADA Handle Access",
-    href: "/asset1",
-  },
-  {
-    id: 3,
-    label: "HOSKY Access",
-    href: "/asset2",
-  },
-  {
-    id: 4,
-    label: "SSO Access",
-    href: "/asset3",
-  },
-  {
-    id: 5,
-    label: "Metadatas",
-    href: "/metadata",
-  },
+    href: "/demo",
+  }
 ];
 
 export function SiteHeader() {
