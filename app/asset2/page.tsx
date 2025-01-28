@@ -49,10 +49,10 @@ export default async function Page() {
     walletAddress: payload.walletAddress,
     email: payload.email,
     walletNetwork: payload.walletNetwork,
-    verifiedPolicy: payload.verifiedPolicy,
+    roles: payload.roles as string[],
   }
 
-  if (data[1].policyID !== userData.verifiedPolicy) {
+  if (!userData.roles.includes(data[1].policyID)) {
     redirect('/')
   }
   return (

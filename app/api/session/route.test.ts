@@ -37,7 +37,7 @@ describe('Authentication Check API', () => {
                 walletAddress: 'wallet123',
                 email: 'test@example.com',
                 walletNetwork: 1,
-                verifiedPolicy: 'policy123',
+                roles: 'policy123',
             },
         });
 

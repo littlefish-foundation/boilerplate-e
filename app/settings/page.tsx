@@ -15,10 +15,6 @@ export default async function Page() {
     redirect('/login')
   }
 
-  const response = await fetch(`${process.env.ROOT_URL}/api/policy`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch policies: ${response.statusText}`);
-  }
   let payload;
   try {
     ({ payload } = await jose.jwtVerify(token.value, JWT_SECRET))
@@ -26,32 +22,21 @@ export default async function Page() {
     redirect('/login')
   }
 
-  // Set the cookie_support_check cookie if it doesn't exist
-  if (!cookieStore.get('cookie_support_check')) {
-    const response = NextResponse.next()
-    response.cookies.set({
-      name: 'cookie_support_check',
-      value: '1',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 86400,
-      path: '/',
-    })
-    return response
-  }
+  // ... (keep other existing code)
 
   const userData = {
+    id: payload.id, // Make sure the JWT payload includes the user's ID
     walletAddress: payload.walletAddress,
     email: payload.email,
     walletNetwork: payload.walletNetwork,
-    verifiedPolicy: payload.verifiedPolicy,
+    roles: payload.roles,
   }
 
-  if ("admin" !== userData.verifiedPolicy) {
+  if (!userData.roles.includes("admin")) {
     redirect('/')
   }
+  
   return (
-    <SettingsPage />
+    <SettingsPage currentUserId={userData.id} />
   )
 }

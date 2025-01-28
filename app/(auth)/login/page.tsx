@@ -5,12 +5,50 @@ import { loginWithMail, loginWithCardano, generateNonce, loginWithAsset } from "
 import { signMessage, useWallet, Asset } from "littlefish-nft-auth-framework/frontend";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter  } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Mail, Wallet, ChevronLeft } from "lucide-react";
+import { convertHexToBech32 } from "littlefish-nft-auth-framework/backend";
+
+interface Policy {
+  id: string;
+  policyID: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function PolicyList() {
+  const response = await fetch("/api/ssoPolicy");
+  const data: Policy[] = await response.json();
+  return data;
+}
+
+const handleSubmit = async (networkID: number, addresses: string[]) => {
+  const formData = {
+      walletNetwork: networkID,
+      stakeAddress: addresses[0],
+  };
+
+  if (!formData.walletNetwork || !formData.stakeAddress) {
+      return;
+  }
+
+  try {
+      const response = await fetch('/api/email', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+      });
+  } catch (error) {
+      console.error('Error:', error);
+  }
+};
 
 async function handleSign(walletID: string, isConnected: boolean, walletAddress: string): Promise<[string, string] | void> {
+
   const nonceResponse = await generateNonce();
   if (!nonceResponse) {
     console.error("Failed to generate nonce");
@@ -25,6 +63,9 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
       console.error("Failed to sign message");
       return;
     }
+    console.log("nonce: ", nonce);
+    console.log("walletAddress: ", walletAddress);
+    console.log("signResponse: ", signResponse);
     return signResponse;
   } catch (error) {
     console.error("Error signing message:", error);
@@ -39,12 +80,50 @@ export default function LoginPage() {
   const [message, setMessage] = useState({ type: "", content: "" });
   const [decodedAssets, setDecodedAssets] = useState<Asset[]>([]);
   const [activeTab, setActiveTab] = useState("email");
+  const [ssoAssets, setSSOAssets] = useState<Asset[]>([]);
+  const [nonSsoAssets, setNonSsoAssets] = useState<Asset[]>([]);
+  const [isRequestingToken, setIsRequestingToken] = useState(false);
 
   useEffect(() => {
     if (assets.length > 0) {
       setDecodedAssets(decodeHexToAscii(assets));
     }
   }, [assets, decodeHexToAscii]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPoliciesAndFilterAssets = async () => {
+      try {
+        const data = await PolicyList();
+        if (!isMounted) return;
+  
+        const policyIDs = new Set(data.map((policy: Policy) => policy.policyID));
+        
+        const [ssoAssets, nonSsoAssets] = assets.reduce(
+          ([sso, nonSso], asset) => {
+            if (policyIDs.has(asset.policyID)) {
+              sso.push(asset);
+            } else {
+              nonSso.push(asset);
+            }
+            return [sso, nonSso];
+          },
+          [[], []] as [Asset[], Asset[]]
+        );
+  
+        setSSOAssets(ssoAssets);
+        setNonSsoAssets(nonSsoAssets);
+      } catch (error) {
+        console.error("Failed to fetch policies or filter assets:", error);
+      }
+    };
+  
+    fetchPoliciesAndFilterAssets();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [assets]);
 
   useEffect(() => {
     if (!isConnected) {
@@ -56,7 +135,7 @@ export default function LoginPage() {
     router.back();
   };
 
-  async function handleCardanoLogin(asset?: Asset) {
+  async function handleCardanoLogin(sso: boolean, asset?: Asset) {
     if (connectedWallet) {
       try {
         const signResponse = await handleSign(connectedWallet.name, isConnected, addresses[0]);
@@ -64,7 +143,7 @@ export default function LoginPage() {
           const [key, signature] = signResponse;
           let result;
           if (asset) {
-            result = await loginWithAsset(addresses[0], networkID, key, signature, asset);
+            result = await loginWithAsset(addresses[0], networkID, key, signature, asset, sso);
           } else {
             result = await loginWithCardano(addresses[0], networkID, key, signature);
           }
@@ -95,6 +174,43 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Email login failed:", error);
       setMessage({ type: "error", content: "Email login failed" });
+    }
+  }
+
+  async function handleRequestToken() {
+    if (!isConnected || !addresses[0]) {
+      setMessage({ type: "error", content: "Please connect your wallet first" });
+      return;
+    }
+
+    setIsRequestingToken(true);
+    setMessage({ type: "", content: "" });
+
+    const formData = {
+      walletNetwork: networkID,
+      stakeAddress: convertHexToBech32(addresses[0], 0),
+    };
+
+    try {
+      const response = await fetch('/api/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to request token');
+      }
+
+      const data = await response.json();
+      setMessage({ type: "success", content: "Token request successful. You will receive the token in less than 24 hours, check your wallet." });
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage({ type: "error", content: "Failed to request token. Please try again." });
+    } finally {
+      setIsRequestingToken(false);
     }
   }
 
@@ -188,7 +304,7 @@ export default function LoginPage() {
                     </div>
                   )}
                   <Button
-                    onClick={() => handleCardanoLogin()}
+                    onClick={() => handleCardanoLogin(false)}
                     className="w-full"
                     disabled={!isConnected}
                   >
@@ -198,17 +314,44 @@ export default function LoginPage() {
                   {isConnected && decodedAssets.length > 0 && (
                     <div className="space-y-2">
                       <Label>Login with Asset</Label>
-                      {decodedAssets.map((asset, index) => (
-                        <Button
-                          key={index}
-                          onClick={() => handleCardanoLogin(assets[index] as Asset)}
-                          className="w-full mb-2"
-                        >
-                          {asset.assetName}
-                        </Button>
-                      ))}
+                      {nonSsoAssets.map((asset, index) => {
+                        const assetIndex = assets.findIndex(a => a.policyID === asset.policyID && a.assetName === asset.assetName);
+                        return (
+                          <Button
+                            key={asset.policyID + asset.assetName}
+                            onClick={() => handleCardanoLogin(false, asset)}
+                            className="w-full mb-2"
+                          >
+                            {assetIndex !== -1 ? decodedAssets[assetIndex].assetName : asset.assetName}
+                          </Button>
+                        );
+                      })}
                     </div>
                   )}
+                  {isConnected && ssoAssets.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>SSO</Label>
+                      {ssoAssets.map((asset, index) => {
+                        const assetIndex = assets.findIndex(a => a.policyID === asset.policyID && a.assetName === asset.assetName);
+                        return (
+                          <Button
+                            key={asset.policyID + asset.assetName}
+                            onClick={() => handleCardanoLogin(true, asset)}
+                            className="w-full mb-2"
+                          >
+                            {assetIndex !== -1 ? decodedAssets[assetIndex].assetName : asset.assetName}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <Button
+                    onClick={handleRequestToken}
+                    className="w-full"
+                    disabled={!isConnected || isRequestingToken}
+                  >
+                    {isRequestingToken ? "Requesting..." : "Request a Demo Token(Preprod only)"}
+                  </Button>
                 </div>
               </TabsContent>
             </Tabs>

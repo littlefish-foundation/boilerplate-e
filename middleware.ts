@@ -10,6 +10,12 @@ interface Policy {
     updatedAt: string;
 }
 
+interface JWTPayload {
+    sub: string;
+    email: string;
+    roles: string[];
+}
+
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 // Cache policies to reduce API calls
@@ -70,12 +76,12 @@ export async function middleware(request: NextRequest) {
         }
 
         try {
-            const { payload } = await jose.jwtVerify(token, JWT_SECRET)
+            const { payload } = await jose.jwtVerify(token, JWT_SECRET) as { payload: JWTPayload };
             const policies = await getPolicies();
 
             // Check permissions
             if (adminPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
-                if (payload.verifiedPolicy !== 'admin') {
+                if (!payload.roles.includes('admin')) {
                     return NextResponse.redirect(new URL('/', request.url))
                 }
             }
@@ -83,7 +89,7 @@ export async function middleware(request: NextRequest) {
             const assetPath = Object.keys(assetPaths).find(path => request.nextUrl.pathname.startsWith(path));
             if (assetPath) {
                 const requiredPolicy = policies[assetPaths[assetPath as keyof typeof assetPaths]]?.policyID;
-                if (payload.verifiedPolicy !== requiredPolicy && payload.verifiedPolicy !== "admin") {
+                if (!payload.roles.includes(requiredPolicy) && !payload.roles.includes("admin")) {
                     return NextResponse.redirect(new URL('/', request.url))
                 }
             }
@@ -92,7 +98,7 @@ export async function middleware(request: NextRequest) {
             const requestHeaders = new Headers(request.headers)
             requestHeaders.set('x-user-id', payload.sub as string)
             requestHeaders.set('x-user-email', payload.email as string)
-            requestHeaders.set('x-user-role', payload.verifiedPolicy as string)
+            requestHeaders.set('x-user-roles', JSON.stringify(payload.roles))
 
             return NextResponse.next({
                 request: { headers: requestHeaders },

@@ -72,7 +72,7 @@ export async function loginWithMail(email: string, password: string): Promise<{ 
   }
 }
 
-export async function loginWithAsset(walletAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset): Promise<{ success?: boolean; error?: string }> {
+export async function loginWithAsset(walletAddress: string, walletNetwork: number, key: string, signature: string, asset: Asset, sso: boolean): Promise<{ success?: boolean; error?: string }> {
   // Create a JSON request body with the wallet details and nonce
   const requestBody = JSON.stringify({
     walletAddress,
@@ -85,13 +85,24 @@ export async function loginWithAsset(walletAddress: string, walletNetwork: numbe
     amount: asset.amount,
   });
 
-  const response = await fetch(`${process.env.ROOT_URL}/api/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: requestBody,
-  });
+  let response;
+  if (sso) {
+    response = await fetch(`${process.env.ROOT_URL}/api/sso`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+  } else {
+    response = await fetch(`${process.env.ROOT_URL}/api/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    });
+  }
   if (!response.ok) {
     const errorText = await response.text();
     return { error: `Error: ${errorText}` };
