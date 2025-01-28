@@ -33,7 +33,6 @@ export default async function UserPage() {
     } catch (error) {
         redirect('/')
     }
-    console.log(payload.roles)
 
     const user = await prisma.user.findFirst(
         {
@@ -46,6 +45,13 @@ export default async function UserPage() {
             }
         }
     );
+
+    let network = null
+    if (user?.walletNetwork === 1) {
+        network = "mainnet"
+    } else {
+        network = "testnet"
+    }
     
     if (!user) {
         return (
@@ -106,7 +112,7 @@ export default async function UserPage() {
                                     <InfoItem
                                         icon={<NetworkIcon className="h-5 w-5" />}
                                         label="Network"
-                                        value={String(user.walletNetwork || 'Not specified')}
+                                        value={String(network)}
                                     />
                                 </div>
                             </div>
