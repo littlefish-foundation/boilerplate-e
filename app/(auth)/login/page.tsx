@@ -26,24 +26,24 @@ async function PolicyList() {
 
 const handleSubmit = async (networkID: number, addresses: string[]) => {
   const formData = {
-      walletNetwork: networkID,
-      stakeAddress: addresses[0],
+    walletNetwork: networkID,
+    stakeAddress: addresses[0],
   };
 
   if (!formData.walletNetwork || !formData.stakeAddress) {
-      return;
+    return;
   }
 
   try {
-      const response = await fetch('/api/email', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-      });
+    const response = await fetch('/api/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
   } catch (error) {
-      console.error('Error:', error);
+    console.error('Error:', error);
   }
 };
 
@@ -70,7 +70,17 @@ async function handleSign(walletID: string, isConnected: boolean, walletAddress:
 }
 
 export default function LoginPage() {
-  const { isConnected, connectedWallet, networkID, addresses, assets, decodeHexToAscii, wallets, connectWallet, disconnectWallet } = useWallet();
+  const {
+    isConnected,
+    connectedWallet,
+    networkID,
+    addresses,
+    assets,
+    decodeHexToAscii,
+    wallets,
+    connectWallet,
+    disconnectWallet
+  } = useWallet();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -93,9 +103,9 @@ export default function LoginPage() {
       try {
         const data = await PolicyList();
         if (!isMounted) return;
-  
+
         const policyIDs = new Set(data.map((policy: Policy) => policy.policyID));
-        
+
         const [ssoAssets, nonSsoAssets] = assets.reduce(
           ([sso, nonSso], asset) => {
             if (policyIDs.has(asset.policyID)) {
@@ -107,16 +117,16 @@ export default function LoginPage() {
           },
           [[], []] as [Asset[], Asset[]]
         );
-  
+
         setSSOAssets(ssoAssets);
         setNonSsoAssets(nonSsoAssets);
       } catch (error) {
         console.error("Failed to fetch policies or filter assets:", error);
       }
     };
-  
+
     fetchPoliciesAndFilterAssets();
-  
+
     return () => {
       isMounted = false;
     };
